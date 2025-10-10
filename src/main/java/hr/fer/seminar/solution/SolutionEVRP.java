@@ -9,6 +9,7 @@ import hr.fer.seminar.entities.Depot;
 import hr.fer.seminar.entities.EVRPProblem;
 import hr.fer.seminar.entities.Location;
 import hr.fer.seminar.entities.Vehicle;
+import hr.fer.seminar.entities.Vehicle.State;
 import hr.fer.seminar.operators.cs.CustomerSelector;
 import hr.fer.seminar.operators.vs.VehicleSupplier;
 import io.jenetics.Gene;
@@ -19,6 +20,8 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 	private static final int VEHICLE_PENALTY_CONSTANT = 0;
 
 	private static final int ENERGY_PENALTY_CONSTANT = 1;
+	
+	private static final int LATENCY_PENALTY_CONSTANT = 0;
 
 	protected final EVRPProblem problem;
 
@@ -33,14 +36,20 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 	public double error(Genotype<T> gt) {
 		List<Vehicle> usedVehicles = getUsedVehicles(gt);
 		double distance = 0;
+		double latency = 0;
 		for (Vehicle vehicle : usedVehicles) {
 			List<Location> route = vehicle.getRoute();
+			List<State> states = vehicle.getState();
 			for (int i = 0; i < route.size() - 1; i++) {
 				distance += Location.distance(route.get(i), route.get(i + 1));
+				double diff = states.get(i + 1).getCurrentTime() - route.get(i + 1).getDueDate();
+				if(diff > 0) {
+					latency += diff;
+				}
 			}
 		}
 		return ENERGY_PENALTY_CONSTANT * distance * problem.getFuelConsumptionRate()
-				+ VEHICLE_PENALTY_CONSTANT * usedVehicles.size();
+				+ VEHICLE_PENALTY_CONSTANT * usedVehicles.size() + LATENCY_PENALTY_CONSTANT * latency;
 	}
 
 	protected List<Vehicle> getUsedVehicles(CustomerSelector cs, VehicleSupplier vehicleSupplier) {
