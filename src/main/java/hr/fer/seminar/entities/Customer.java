@@ -11,6 +11,11 @@ public class Customer extends Location {
 		super(id, x, y, demand, readyTime, dueDate, serviceTime);
 	}
 	
+	public Customer(Customer customer, double demand, double serviceTime) {
+		super(customer.getId(), customer.getX(), customer.getY(), demand, customer.getReadyTime(), customer.getDueDate(), serviceTime);
+		nearestChargingStation = customer.nearestChargingStation;
+	}
+	
 	public ChargingStation getNearestChargingStation() {
 		if(nearestChargingStation == null) {
 			throw new NoSuchElementException();

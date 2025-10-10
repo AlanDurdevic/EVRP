@@ -96,15 +96,16 @@ public class Vehicle {
 	}
 
 	public void addLocation(Location location) {
-		if(currentTime > location.getDueDate()) {
-			System.out.println("Greška CT " + location.getId());
-			throw new RuntimeException();
+		if (currentTime > location.getDueDate()) {
+			System.out.println("Greška CT " + location.getId() + " current time: " + currentTime + "due time: " + location.getDueDate());
+			if (!location.getId().equals("D0"))
+				throw new RuntimeException();
 		}
-		if(fuelCapacityLeft < 0) {
+		if (fuelCapacityLeft < 0) {
 			System.out.println("Greška FC");
 			throw new RuntimeException();
 		}
-		if(loadCapacityLeft < location.getDemand()) {
+		if (loadCapacityLeft < location.getDemand()) {
 			System.out.println("Greška LC");
 			throw new RuntimeException();
 		}

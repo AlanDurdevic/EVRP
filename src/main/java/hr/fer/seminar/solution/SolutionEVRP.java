@@ -146,7 +146,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 	}
 
 	// check if vehicle can visit charging station before last customer
-	private boolean checkIfCanVisitChargingStationBeforeLastCustomer(Vehicle v, Customer customer) {
+	protected boolean checkIfCanVisitChargingStationBeforeLastCustomer(Vehicle v, Customer customer) {
 		Depot depot = problem.getDepot();
 		double fuelConsumptionRate = problem.getFuelConsumptionRate();
 		double averageVelocity = problem.getAverageVelocity();
@@ -203,7 +203,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 
 	// choose charging station before return depot
 	// case when charging before visiting last customer
-	private ChargingStation chooseChargingStationBeforeDepot(Vehicle v, Customer destination) {
+	protected ChargingStation chooseChargingStationBeforeDepot(Vehicle v, Customer destination) {
 		Location currentLocation = v.getCurrentLocation();
 		Depot depot = problem.getDepot();
 		double vehicleFullTankCapacity = problem.getVehicleFuelTankCapacity();
@@ -259,7 +259,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 	}
 
 	// check if vehicle can return to depot in time from every customer
-	private boolean checkIfVehicleCanReturnToDepot(Vehicle v, Customer customer) {
+	protected boolean checkIfVehicleCanReturnToDepot(Vehicle v, Customer customer) {
 		Depot depot = problem.getDepot();
 		double fuelConsumptionRate = problem.getFuelConsumptionRate();
 		double averageVelocity = problem.getAverageVelocity();
@@ -351,7 +351,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		return (int) (sum / problem.getVehicleLoadCapacity()) + 1;
 	}
 
-	private void charge(Vehicle v, ChargingStation chargingStation) {
+	protected void charge(Vehicle v, ChargingStation chargingStation) {
 		// travel to charging station
 		double distance = Location.distance(v.getCurrentLocation(), chargingStation);
 		double time = distance / problem.getAverageVelocity();
@@ -367,7 +367,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 	}
 
 	// choose station to preserve time window
-	private ChargingStation chooseChargingStation(Vehicle v, Location location) {
+	protected ChargingStation chooseChargingStation(Vehicle v, Location location) {
 		if (location instanceof Depot) {
 			return null;
 		}
@@ -411,7 +411,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		return bestChargingStation;
 	}
 
-	private List<Customer> initializeUC() {
+	protected List<Customer> initializeUC() {
 		List<Customer> UC = new ArrayList<>();
 		UC.addAll(problem.getCustomers());
 		return UC;
