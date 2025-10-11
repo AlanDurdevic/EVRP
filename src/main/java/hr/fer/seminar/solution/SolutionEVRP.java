@@ -17,9 +17,9 @@ import io.jenetics.Genotype;
 
 public abstract class SolutionEVRP<T extends Gene<?, T>> {
 
-	private static final double VEHICLE_PENALTY_CONSTANT = 0;
+	private static final double VEHICLE_PENALTY_CONSTANT = 10;
 
-	private static final double ENERGY_PENALTY_CONSTANT = 1;
+	private static final double ENERGY_PENALTY_CONSTANT = 0;
 	
 	private static final double LATENCY_PENALTY_CONSTANT = 0;
 

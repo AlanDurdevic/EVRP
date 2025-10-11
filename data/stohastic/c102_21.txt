@@ -129,3 +129,4 @@ g inverse refueling rate /3.39/
 v average Velocity /1.0/
 Demand stohastic Gaussian 0.2
 Service deterministic Uniform 0.15
+Velocity stohastic Gaussian 0.1

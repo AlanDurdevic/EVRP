@@ -96,7 +96,7 @@ public class StohasticEVRP {
 				inverseRefuelingRate = 0, averageVelocity = 0;
 		List<Customer> customers = new ArrayList<>();
 		List<ChargingStation> chargingStations = new ArrayList<>();
-		Distribution demandDistribution = null, serviceTimeDistribution = null;
+		Distribution demandDistribution = null, serviceTimeDistribution = null, velocityDistribution = null;
 
 		try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
 			br.readLine();
@@ -180,6 +180,18 @@ public class StohasticEVRP {
 					serviceTimeDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
 				}
 			}
+			
+			line = br.readLine();
+			splittedLine = line.split(" ");
+			velocityDistribution = new NoDistribution();
+			if(splittedLine[1].equals("stohastic")) {
+				if(splittedLine[2].equals("Gaussian")) {
+					velocityDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+				}
+				else if(splittedLine[2].equals("Uniform")) {
+					velocityDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
+				}
+			}
 
 		} catch (IOException e) {
 			System.err.println("Error while opening file: " + filename);
@@ -200,7 +212,7 @@ public class StohasticEVRP {
 		}
 
 		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceTimeDistribution);
+				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceTimeDistribution, velocityDistribution);
 	}
 
 }

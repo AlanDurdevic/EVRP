@@ -25,6 +25,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		StohasticEVRPProblem problem = (StohasticEVRPProblem) this.problem;
 		Distribution demandDistribution = problem.getDemandDistribution();
 		Distribution serviceTimeDistribution = problem.getServiceTimeDistribution();
+		Distribution velocityDistribution = problem.getVelocityDistribution();
 		
 		int numberOfVehicles = vehicleSupplier.getNumberOfVehiclesLeft();
 		List<Vehicle> usedVehicles = new ArrayList<>();
@@ -38,6 +39,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			Customer c = cs.selectCustomer(v, UC, problem);
 			double demand = 0;
 			double serviceTime = 0;
+			double velocity = 0;
 			if (c == null) {
 				destination = depot;
 			} else {
@@ -62,8 +64,9 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 					// choose charging station
 					charge(v, chooseChargingStationBeforeDepot(v, c));
 					// go to customer
+					velocity = velocityDistribution.generate(averageVelocity);
 					double distance = Location.distance(v.getCurrentLocation(), destination);
-					double time = distance / averageVelocity;
+					double time = distance / velocity;
 					v.addTime(time);
 					double fuel = fuelConsumptionRate * distance;
 					v.subtractFuelCapacity(fuel);
@@ -100,8 +103,9 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 
 			}
 			// travel to destination
+			velocity = velocityDistribution.generate(averageVelocity);
 			double distance = Location.distance(v.getCurrentLocation(), destination);
-			double time = distance / averageVelocity;
+			double time = distance / velocity;
 			v.addTime(time);
 			double fuel = fuelConsumptionRate * distance;
 			v.subtractFuelCapacity(fuel);
@@ -136,6 +140,24 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		}
 
 		return usedVehicles;
+	}
+	
+	@Override
+	protected void charge(Vehicle v, ChargingStation chargingStation) {
+		Distribution velocityDistribution = ((StohasticEVRPProblem) problem).getVelocityDistribution();
+		// travel to charging station
+		double velocity = velocityDistribution.generate(problem.getAverageVelocity());
+		double distance = Location.distance(v.getCurrentLocation(), chargingStation);
+		double time = distance / velocity;
+		v.addTime(time);
+		double fuel = problem.getFuelConsumptionRate() * distance;
+		v.subtractFuelCapacity(fuel);
+		v.addLocation(chargingStation);
+		// charging vehicle
+		double capacityToCharge = problem.getVehicleFuelTankCapacity() - v.getFuelCapacityLeft();
+		time = capacityToCharge * problem.getInverseRefuelingRate();
+		v.addTime(time);
+		v.setFuelCapacity(problem.getVehicleFuelTankCapacity());
 	}
 
 }

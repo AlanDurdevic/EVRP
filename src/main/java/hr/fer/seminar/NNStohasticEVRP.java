@@ -20,7 +20,7 @@ import hr.fer.seminar.operators.vs.ParallelVehicleSupplier;
 import hr.fer.seminar.operators.vs.SemiParallelVehicleSupplier;
 import hr.fer.seminar.operators.vs.SerialVehicleSupplier;
 import hr.fer.seminar.operators.vs.VehicleSupplier;
-import hr.fer.seminar.solution.NNSolutionEVRP;
+import hr.fer.seminar.solution.NNStohasticSolutionEVRP;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.NoDistribution;
@@ -58,7 +58,7 @@ public class NNStohasticEVRP {
 			}
 			}
 				
-			NNSolutionEVRP<?> solution = new NNSolutionEVRP<>(problem, cs, vs);
+			NNStohasticSolutionEVRP<?> solution = new NNStohasticSolutionEVRP<>(problem, cs, vs);
 			List<Vehicle> usedVehicles = solution.getUsedVehicles();
 			System.out.println("Number of vehicles: " + usedVehicles.size());
 			usedVehicles.forEach(v -> printRoute(v));
@@ -93,7 +93,7 @@ public class NNStohasticEVRP {
 				inverseRefuelingRate = 0, averageVelocity = 0;
 		List<Customer> customers = new ArrayList<>();
 		List<ChargingStation> chargingStations = new ArrayList<>();
-		Distribution demandDistribution = null, serviceTimeDistribution = null;
+		Distribution demandDistribution = null, serviceTimeDistribution = null, velocityDistribution = null;
 
 		try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
 			br.readLine();
@@ -177,6 +177,18 @@ public class NNStohasticEVRP {
 					serviceTimeDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
 				}
 			}
+			
+			line = br.readLine();
+			splittedLine = line.split(" ");
+			velocityDistribution = new NoDistribution();
+			if(splittedLine[1].equals("stohastic")) {
+				if(splittedLine[2].equals("Gaussian")) {
+					velocityDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+				}
+				else if(splittedLine[2].equals("Uniform")) {
+					velocityDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
+				}
+			}
 
 		} catch (IOException e) {
 			System.err.println("Error while opening file: " + filename);
@@ -197,7 +209,7 @@ public class NNStohasticEVRP {
 		}
 
 		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceTimeDistribution);
+				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceTimeDistribution, velocityDistribution);
 	}
 	
 	private static int getLUNumberOfVehicles(StohasticEVRPProblem problem) {

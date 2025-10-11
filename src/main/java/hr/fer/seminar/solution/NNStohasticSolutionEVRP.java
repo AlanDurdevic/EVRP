@@ -9,13 +9,13 @@ import hr.fer.seminar.operators.vs.VehicleSupplier;
 import io.jenetics.Gene;
 import io.jenetics.Genotype;
 
-public class NNSolutionEVRP<T extends Gene<?, T>> extends StohasticSolutionEVRP<T>{
+public class NNStohasticSolutionEVRP<T extends Gene<?, T>> extends StohasticSolutionEVRP<T>{
 	
 	private final CustomerSelector cs;
 	
 	private final VehicleSupplier vs;
 
-	public NNSolutionEVRP(StohasticEVRPProblem problem, CustomerSelector cs, VehicleSupplier vs) {
+	public NNStohasticSolutionEVRP(StohasticEVRPProblem problem, CustomerSelector cs, VehicleSupplier vs) {
 		super(problem);
 		this.cs = cs;
 		this.vs = vs;
