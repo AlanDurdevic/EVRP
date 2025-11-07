@@ -6,17 +6,22 @@ import hr.fer.seminar.util.stohastic.distribution.Distribution;
 
 public class GaussianDistribution implements Distribution{
 	
+	private final double mean;
+	
 	private final double stddev;
 	
 	private final Random random = new Random();
 
-	public GaussianDistribution(double stddev) {
-		this.stddev = stddev;
+	public GaussianDistribution(double CV) {
+		this.stddev = Math.sqrt(Math.log(1 + CV * CV));
+		this.mean = -(stddev * stddev) / 2;
 	}
 
 	@Override
-	public double generate(double mean) {
-		return random.nextGaussian(mean, stddev);
+	public double generate(double value) {
+		double stdNormal = random.nextGaussian();
+		double lambda = Math.exp(stddev * stdNormal + mean);
+		return lambda * value;
 	}
 
 }

@@ -6,18 +6,18 @@ import hr.fer.seminar.util.stohastic.distribution.Distribution;
 
 public class UniformDistribution implements Distribution{
 	
-	private final double variation;
+	private final double CV;
 	
 	private final Random random = new Random();
 
-	public UniformDistribution(double variation) {
-		this.variation = variation;
+	public UniformDistribution(double CV) {
+		this.CV = CV;
 	}
 
 	@Override
-	public double generate(double mean) {
-		double diff = mean * variation;
-		return random.nextInt((int)(mean - diff), (int)(mean + diff + 1));
+	public double generate(double value) {
+		double lambda = random.nextDouble(1 - CV, 1 + CV);
+		return lambda * value;
 	}
 
 }

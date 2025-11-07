@@ -37,17 +37,11 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			Location destination = null;
 			Vehicle v = vehicleSupplier.getVehicle();
 			Customer c = cs.selectCustomer(v, UC, problem);
-			double demand = 0;
-			double serviceTime = 0;
 			double velocity = 0;
 			if (c == null) {
 				destination = depot;
 			} else {
-				//calculate new demand and service time
-				demand = demandDistribution.generate(c.getDemand());
-				serviceTime = serviceTimeDistribution.generate(c.getServiceTime());
-				
-				if (v.getLoadCapacityLeft() >= demand) {
+				if (v.getLoadCapacityLeft() >= c.getDemand()) {
 					double timeNeeded = Location.distance(v.getCurrentLocation(), c) / averageVelocity;
 					if (v.getCurrentTime() + timeNeeded <= c.getDueDate()) {
 						destination = c;
@@ -70,15 +64,23 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 					v.addTime(time);
 					double fuel = fuelConsumptionRate * distance;
 					v.subtractFuelCapacity(fuel);
-					v.addLocation(new Customer((Customer) destination, demand, serviceTime));
-					// wait if arrive early
-					if (v.getCurrentTime() < destination.getReadyTime()) {
-						v.addTime(destination.getReadyTime() - v.getCurrentTime());
+					//calculate new demand and service time
+					double serviceTime = serviceTimeDistribution.generate(destination.getServiceTime());
+					double demand = demandDistribution.generate(destination.getDemand());			
+					if(demand <= v.getLoadCapacityLeft()) {
+						v.addLocation(new Customer((Customer) destination, demand, serviceTime));
+						// wait if arrive early
+						if (v.getCurrentTime() < destination.getReadyTime()) {
+							v.addTime(destination.getReadyTime() - v.getCurrentTime());
+						}
+						// serving customer
+						v.addTime(serviceTime);
+						v.subtractLoadCapacity(demand);
+						UC.remove(c);
 					}
-					// serving customer
-					v.addTime(serviceTime);
-					v.subtractLoadCapacity(demand);
-					UC.remove(c);
+					else {
+						v.addLocation(new Customer((Customer) destination, 0, 0));
+					}
 				}
 				destination = depot;
 			}
@@ -109,24 +111,49 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			v.addTime(time);
 			double fuel = fuelConsumptionRate * distance;
 			v.subtractFuelCapacity(fuel);
-			if(destination instanceof Customer) {
-				v.addLocation(new Customer((Customer)destination, demand, serviceTime));
-			}
-			else {
-				v.addLocation(destination);
-			}
-			
 			if (destination instanceof Customer) {
-				// arrives before
-				if (v.getCurrentTime() < destination.getReadyTime()) {
-					v.addTime(destination.getReadyTime() - v.getCurrentTime());
+				//calculate new demand and service time
+				double serviceTime = serviceTimeDistribution.generate(destination.getServiceTime());
+				double demand = demandDistribution.generate(destination.getDemand());	
+				if(demand <= v.getLoadCapacityLeft()) {
+					v.addLocation(new Customer((Customer)destination, demand, serviceTime));
+					// arrives before
+					if (v.getCurrentTime() < destination.getReadyTime()) {
+						v.addTime(destination.getReadyTime() - v.getCurrentTime());
+					}
+					// serving customer
+					v.addTime(serviceTime);
+					v.subtractLoadCapacity(demand);
+					UC.remove(c);
+					vehicleSupplier.addVehicle(v);
 				}
-				// serving customer
-				v.addTime(serviceTime);
-				v.subtractLoadCapacity(demand);
-				UC.remove(c);
-				vehicleSupplier.addVehicle(v);
+				else {
+					v.addLocation(new Customer((Customer)destination, 0, 0));
+					// check if can return to depot
+					distance = Location.distance(destination, depot);
+					fuelNeeded = distance * fuelConsumptionRate;
+					if (fuelNeeded > v.getFuelCapacityLeft()) {
+						charge(v, ((Customer) destination).getNearestChargingStation());
+					}
+					
+					destination = depot;
+					// return to depot
+					velocity = velocityDistribution.generate(averageVelocity);
+					distance = Location.distance(v.getCurrentLocation(), destination);
+					time = distance / velocity;
+					v.addTime(time);
+					fuel = fuelConsumptionRate * distance;
+					v.subtractFuelCapacity(fuel);
+					v.addLocation(destination);
+					usedVehicles.add(v);
+					vehicleSupplier.vehicleFinished(v, UC);
+					if (!vehicleSupplier.hasMoreVehicles() && !UC.isEmpty()) {
+						vehicleSupplier.addVehicle(new Vehicle(numberOfVehicles++, problem.getVehicleFuelTankCapacity(),
+								problem.getVehicleLoadCapacity(), depot));
+					}
+				}
 			} else {
+				v.addLocation(destination);
 				// returning vehicle to depot
 				usedVehicles.add(v);
 				vehicleSupplier.vehicleFinished(v, UC);

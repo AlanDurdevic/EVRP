@@ -32,6 +32,10 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 	public SolutionEVRP(EVRPProblem problem) {
 		this.problem = problem;
 	}
+	
+	public EVRPProblem getProblem() {
+		return problem;
+	}
 
 	public double error(Genotype<T> gt) {
 		List<Vehicle> usedVehicles = getUsedVehicles(gt);

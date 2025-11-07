@@ -127,6 +127,3 @@ C Vehicle load capacity /200.0/
 r fuel consumption rate /1.0/
 g inverse refueling rate /3.39/
 v average Velocity /1.0/
-Demand stohastic Gaussian 0.1
-Service deterministic Uniform 0.1
-Velocity stohastic Gaussian 0.1

@@ -1,11 +1,15 @@
-package hr.fer.seminar.solution.gp;
+package hr.fer.seminar.solution.gp.impl;
 
 import static io.jenetics.util.RandomRegistry.random;
 
-import hr.fer.seminar.entities.StohasticEVRPProblem;
+import java.util.List;
+
+import hr.fer.seminar.entities.Location;
+import hr.fer.seminar.entities.Vehicle;
+import hr.fer.seminar.entities.Vehicle.State;
 import hr.fer.seminar.operators.InterceptorGP;
 import hr.fer.seminar.operators.MyMathOp;
-import hr.fer.seminar.solution.StohasticSolutionEVRP;
+import hr.fer.seminar.solution.gp.GeneticProgrammingStohasticEVRP;
 import io.jenetics.EliteSelector;
 import io.jenetics.Genotype;
 import io.jenetics.Mutator;
@@ -21,7 +25,13 @@ import io.jenetics.prog.op.Op;
 import io.jenetics.prog.op.Var;
 import io.jenetics.util.ISeq;
 
-public abstract class GeneticProgrammingStohasticEVRP extends StohasticSolutionEVRP<ProgramGene<Double>>{
+public class GeneticProgrammingStohasticEVRPMultiple{
+	
+	private static final double VEHICLE_PENALTY_CONSTANT = 100;
+
+	private static final double ENERGY_PENALTY_CONSTANT = 0;
+	
+	private static final double LATENCY_PENALTY_CONSTANT = 1;
 	
 	private final static int MAXIMUM_DEPTH = 255;
 
@@ -43,16 +53,35 @@ public abstract class GeneticProgrammingStohasticEVRP extends StohasticSolutionE
 			Var.of("ECni", 8), Var.of("ERPni", 9), Var.of("EDepni", 10), Var.of("ERPpvk", 11), Var.of("EDeppvk", 12),
 			EphemeralConst.of(() -> ((double) random().nextInt(11)) / 10));
 
-	public GeneticProgrammingStohasticEVRP(StohasticEVRPProblem problem) {
-		super(problem);
+	private final List<GeneticProgrammingStohasticEVRP> problems;
+	
+	public GeneticProgrammingStohasticEVRPMultiple(List<GeneticProgrammingStohasticEVRP> problems) {
+		this.problems = problems;
 	}
 	
-	@Override
 	public double error(Genotype<ProgramGene<Double>> gt) {
-		return super.error(gt) + gt.gene().depth();
+		double fuel = 0;
+		double latency = 0;
+		int vehiclesNumber = 0;
+		for(GeneticProgrammingStohasticEVRP problem : problems) {
+			List<Vehicle> usedVehicles = problem.getUsedVehicles(gt);
+			vehiclesNumber += usedVehicles.size();
+			for (Vehicle vehicle : usedVehicles) {
+				List<Location> route = vehicle.getRoute();
+				List<State> states = vehicle.getState();
+				for (int i = 0; i < route.size() - 1; i++) {
+					fuel += Location.distance(route.get(i), route.get(i + 1)) * problem.getProblem().getFuelConsumptionRate();
+					double diff = states.get(i + 1).getCurrentTime() - route.get(i + 1).getDueDate();
+					if(diff > 0) {
+						latency += diff;
+					}
+				}
+			}
+		}
+		return ENERGY_PENALTY_CONSTANT * fuel
+				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency;
 	}
 
-	@Override
 	public Genotype<ProgramGene<Double>> calculate() {
 		ProgramChromosome<Double> pgf = ProgramChromosome.of(STARTING_DEPTH, ch -> ch.root().size() <= MAXIMUM_DEPTH,
 				OPERATIONS, TERMINALS);
