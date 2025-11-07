@@ -14,6 +14,7 @@ import hr.fer.seminar.solution.gp.GeneticProgrammingStohasticEVRP;
 import io.jenetics.EliteSelector;
 import io.jenetics.Genotype;
 import io.jenetics.Mutator;
+import io.jenetics.Phenotype;
 import io.jenetics.TournamentSelector;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
@@ -83,7 +84,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency;
 	}
 
-	public Genotype<ProgramGene<Double>> calculate() {
+	public ISeq<Phenotype<ProgramGene<Double>,Double>> calculate() {
 		ProgramChromosome<Double> pgf = ProgramChromosome.of(STARTING_DEPTH, ch -> ch.root().size() <= MAXIMUM_DEPTH,
 				OPERATIONS, TERMINALS);
 		final Engine<ProgramGene<Double>, Double> engine = Engine.builder(this::error, pgf).minimizing()
@@ -93,10 +94,11 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 				.offspringFraction(OFFSPRING_FRACTION).alterers(new SingleNodeCrossover<>(1), new Mutator<>(0.2))
 				.interceptor(new InterceptorGP()).build();
 
-		final EvolutionResult<ProgramGene<Double>, Double> result = engine.stream().limit(ITERATION_NUMBER)
-				.collect(EvolutionResult.toBestEvolutionResult());
+		return engine.stream().limit(ITERATION_NUMBER).collect(EvolutionResult.toBestEvolutionResult()).population();
 
-		return result.bestPhenotype().genotype();
 	}
+	
+	
+
 
 }
