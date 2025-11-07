@@ -3,6 +3,7 @@ package hr.fer.seminar.solution.gp.impl;
 import static io.jenetics.util.RandomRegistry.random;
 
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import hr.fer.seminar.entities.Location;
 import hr.fer.seminar.entities.Vehicle;
@@ -86,6 +87,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 		ProgramChromosome<Double> pgf = ProgramChromosome.of(STARTING_DEPTH, ch -> ch.root().size() <= MAXIMUM_DEPTH,
 				OPERATIONS, TERMINALS);
 		final Engine<ProgramGene<Double>, Double> engine = Engine.builder(this::error, pgf).minimizing()
+				.executor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
 				.populationSize(POPULATION_SIZE).maximalPhenotypeAge(ITERATION_NUMBER + 1)
 				.survivorsSelector(new EliteSelector<>(ELITISM_NUMBER)).offspringSelector(new TournamentSelector<>(3))
 				.offspringFraction(OFFSPRING_FRACTION).alterers(new SingleNodeCrossover<>(1), new Mutator<>(0.2))

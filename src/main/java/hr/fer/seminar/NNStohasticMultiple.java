@@ -20,15 +20,8 @@ import hr.fer.seminar.operators.cs.NNCustomerSelector;
 import hr.fer.seminar.operators.vs.SerialVehicleSupplier;
 import hr.fer.seminar.operators.vs.VehicleSupplier;
 import hr.fer.seminar.solution.NNStohasticSolutionEVRP;
-import hr.fer.seminar.solution.gp.GeneticProgrammingStohasticEVRP;
-import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPMultiple;
-import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSerialVehicle;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
-import io.jenetics.Genotype;
-import io.jenetics.ext.util.TreeNode;
-import io.jenetics.prog.ProgramGene;
-import io.jenetics.prog.op.Op;
 
 public class NNStohasticMultiple {
 	
