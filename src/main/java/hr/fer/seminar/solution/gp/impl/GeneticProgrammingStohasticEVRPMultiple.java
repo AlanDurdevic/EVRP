@@ -28,11 +28,11 @@ import io.jenetics.util.ISeq;
 
 public class GeneticProgrammingStohasticEVRPMultiple{
 	
-	private static final double VEHICLE_PENALTY_CONSTANT = 100;
+	private static final double VEHICLE_PENALTY_CONSTANT = 1;
 
 	private static final double ENERGY_PENALTY_CONSTANT = 0;
 	
-	private static final double LATENCY_PENALTY_CONSTANT = 1;
+	private static final double LATENCY_PENALTY_CONSTANT = 0;
 	
 	private final static int MAXIMUM_DEPTH = 255;
 
