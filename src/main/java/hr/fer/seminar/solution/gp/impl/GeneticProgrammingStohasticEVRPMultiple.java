@@ -41,7 +41,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 
 	private static final int POPULATION_SIZE = 200;
 
-	private static final int ITERATION_NUMBER = 1000;
+	private static final int ITERATION_NUMBER = 1;
 
 	private static final int ELITISM_NUMBER = 1;
 

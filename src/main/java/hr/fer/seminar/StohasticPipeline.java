@@ -70,11 +70,11 @@ public class StohasticPipeline {
 		for(int i = 0; i < 30; i++) {
 			final Genotype<ProgramGene<Double>> programDynamic = population.get(i).genotype();
 			final TreeNode<Op<Double>> treeDynamic = programDynamic.gene().toTreeNode();
-			System.out.println("Rank: " + (i + 1));
-			System.out.println("Program: " + treeDynamic);
-			System.out.println("Tree depth: " + programDynamic.gene().depth());
-			System.out.println("Error: " + (population.get(i).fitness()- treeDynamic.depth()) /1000);
-			System.out.println();
+			if(i == 0) {
+				System.out.println("Program: " + treeDynamic);
+				System.out.println("Tree depth: " + programDynamic.gene().depth());
+				System.out.println("Error train: " + (population.get(i).fitness()- treeDynamic.depth()) /1000);
+			}
 			String treeString = treeDynamic.toString();
 			String[] splittedString = treeString.split("[,()]");
 			for(String s : splittedString) {
@@ -104,7 +104,7 @@ public class StohasticPipeline {
 		final Genotype<ProgramGene<Double>> bestProgram = population.get(0).genotype();
 		GeneticProgrammingStohasticEVRPMultiple test = new GeneticProgrammingStohasticEVRPMultiple(testProblems);
 		double n = (test.error(bestProgram) - bestProgram.gene().depth()) / 1000;
-		System.out.println("Number of vehicle test: " + n);
+		System.out.println("Error test: " + n);
 		System.exit(0);
 		
 		
