@@ -29,7 +29,7 @@ import io.jenetics.util.ISeq;
 
 public class GeneticProgrammingStohasticEVRPMultiple{
 	
-	private static final double VEHICLE_PENALTY_CONSTANT = 1;
+	private static final double VEHICLE_PENALTY_CONSTANT = 1000;
 
 	private static final double ENERGY_PENALTY_CONSTANT = 0;
 	
@@ -81,7 +81,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 			}
 		}
 		return ENERGY_PENALTY_CONSTANT * fuel
-				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency;
+				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency + gt.gene().depth();
 	}
 
 	public ISeq<Phenotype<ProgramGene<Double>,Double>> calculate() {

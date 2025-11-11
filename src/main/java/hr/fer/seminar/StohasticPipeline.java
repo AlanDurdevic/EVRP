@@ -6,8 +6,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import hr.fer.seminar.entities.ChargingStation;
@@ -64,16 +66,26 @@ public class StohasticPipeline {
 		ISeq<Phenotype<ProgramGene<Double>,Double>> populationSeq = gp.calculate();
 		List<Phenotype<ProgramGene<Double>,Double>> population = populationSeq.stream().sorted((a, b) -> Double.compare(a.fitness(), b.fitness())).collect(Collectors.toList());
 
+		Map<String, Integer> counter = new HashMap<>();
 		for(int i = 0; i < 30; i++) {
 			final Genotype<ProgramGene<Double>> programDynamic = population.get(i).genotype();
 			final TreeNode<Op<Double>> treeDynamic = programDynamic.gene().toTreeNode();
 			System.out.println("Rank: " + (i + 1));
 			System.out.println("Program: " + treeDynamic);
 			System.out.println("Tree depth: " + programDynamic.gene().depth());
-			System.out.println("Error: " + population.get(i).fitness());
+			System.out.println("Error: " + (population.get(i).fitness()- treeDynamic.depth()) /1000);
 			System.out.println();
+			String treeString = treeDynamic.toString();
+			String[] splittedString = treeString.split("[,()]");
+			for(String s : splittedString) {
+				if(!counter.containsKey(s)) {
+					counter.put(s, 0);
+				}
+				counter.put(s, counter.get(s) + 1);
+			}
 		}
 		
+		counter.forEach((k, v) -> System.out.println(k + ":" + v));
 		
 		folder = new File(testFolder);
 		listFiles = folder.listFiles();
@@ -86,19 +98,19 @@ public class StohasticPipeline {
 		
 		List<GeneticProgrammingStohasticEVRP> testProblems = new LinkedList<>();
 		for(String filename : testFileNames) {
-			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblemTest(filename)));
+			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblemTest(filename, new NoDistribution(), new NoDistribution(), new NoDistribution())));
 		}
 		
-		final Genotype<ProgramGene<Double>> program = population.get(0).genotype();
+		final Genotype<ProgramGene<Double>> bestProgram = population.get(0).genotype();
 		GeneticProgrammingStohasticEVRPMultiple test = new GeneticProgrammingStohasticEVRPMultiple(testProblems);
-		double n = test.error(program);
+		double n = (test.error(bestProgram) - bestProgram.gene().depth()) / 1000;
 		System.out.println("Number of vehicle test: " + n);
 		System.exit(0);
 		
 		
 	}
 	
-	private static StohasticEVRPProblem generateProblemTest(String filename) {
+	private static StohasticEVRPProblem generateProblemTest(String filename, Distribution demandDistribution, Distribution serviceDistribution, Distribution velocityDistribution) {
 		Depot depot = null;
 		double dueDate = 0, vehicleFuelTankCapacity = 0, vehicleLoadCapacity = 0, fuelConsumptionRate = 0,
 				inverseRefuelingRate = 0, averageVelocity = 0;
@@ -183,7 +195,7 @@ public class StohasticPipeline {
 		}
 
 		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, new NoDistribution(), new NoDistribution(), new NoDistribution());
+				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceDistribution, velocityDistribution);
 	}
 
 	private static StohasticEVRPProblem generateProblem(String filename) {
