@@ -41,7 +41,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 
 	private static final int POPULATION_SIZE = 200;
 
-	private static final int ITERATION_NUMBER = 1;
+	private static final int ITERATION_NUMBER = 1000;
 
 	private static final int ELITISM_NUMBER = 1;
 
@@ -82,6 +82,31 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 		}
 		return ENERGY_PENALTY_CONSTANT * fuel
 				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency + gt.gene().depth();
+		
+	}
+	
+	public double errorWD(Genotype<ProgramGene<Double>> gt) {
+		double fuel = 0;
+		double latency = 0;
+		int vehiclesNumber = 0;
+		for(GeneticProgrammingStohasticEVRP problem : problems) {
+			List<Vehicle> usedVehicles = problem.getUsedVehicles(gt);
+			vehiclesNumber += usedVehicles.size();
+			for (Vehicle vehicle : usedVehicles) {
+				List<Location> route = vehicle.getRoute();
+				List<State> states = vehicle.getState();
+				for (int i = 0; i < route.size() - 1; i++) {
+					fuel += Location.distance(route.get(i), route.get(i + 1)) * problem.getProblem().getFuelConsumptionRate();
+					double diff = states.get(i + 1).getCurrentTime() - route.get(i + 1).getDueDate();
+					if(diff > 0) {
+						latency += diff;
+					}
+				}
+			}
+		}
+		return ENERGY_PENALTY_CONSTANT * fuel
+				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency;
+		
 	}
 
 	public ISeq<Phenotype<ProgramGene<Double>,Double>> calculate() {
@@ -92,7 +117,8 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 				.populationSize(POPULATION_SIZE).maximalPhenotypeAge(ITERATION_NUMBER + 1)
 				.survivorsSelector(new EliteSelector<>(ELITISM_NUMBER)).offspringSelector(new TournamentSelector<>(3))
 				.offspringFraction(OFFSPRING_FRACTION).alterers(new SingleNodeCrossover<>(1), new Mutator<>(0.2))
-				.interceptor(new InterceptorGP()).build();
+				.interceptor(new InterceptorGP())
+				.build();
 
 		return engine.stream().limit(ITERATION_NUMBER).collect(EvolutionResult.toBestEvolutionResult()).population();
 

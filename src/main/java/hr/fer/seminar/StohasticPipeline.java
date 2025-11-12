@@ -2,7 +2,9 @@ package hr.fer.seminar;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSerialVehi
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.NoDistribution;
+import hr.fer.seminar.util.stohastic.distribution.impl.UniformDistribution;
 import io.jenetics.Genotype;
 import io.jenetics.Phenotype;
 import io.jenetics.ext.util.TreeNode;
@@ -31,86 +34,177 @@ import io.jenetics.prog.op.Op;
 import io.jenetics.util.ISeq;
 
 public class StohasticPipeline {
-	
+
+	private static final int numberOfExperiments = 10;
+
+	private static final String resultsFile = "./soft-vehicle-serial";
+
 	private static final Distribution demandDistribution = new GaussianDistribution(0.2);
-	
+
 	private static final Distribution serviceTimeDistribution = new GaussianDistribution(0.2);
-	
+
 	private static final Distribution velocityDistribution = new GaussianDistribution(0.2);
-	
+
 	private static final String trainFolder = "./data/stohastic/train";
-	
+
 	private static final String testFolder = "./data/stohastic/test";
-	
+
 	private static final int numberOfClonesTrain = 2;
-	
-	private static final int numberOfClonesTest = 5;
-		
+
+	private static final int numberOfClonesTest = 6;
+
 	public static void main(String[] args) {
-		
+
 		File folder = new File(trainFolder);
 		File[] listFiles = folder.listFiles();
 		List<String> trainFileNames = new LinkedList<>();
-		for(File file : listFiles) {
-			for(int i = 0; i < numberOfClonesTrain; i++) {
+		for (File file : listFiles) {
+			for (int i = 0; i < numberOfClonesTrain; i++) {
 				trainFileNames.add(trainFolder + "/" + file.getName());
 			}
 		}
-		
-		List<GeneticProgrammingStohasticEVRP> trainProblems = new LinkedList<>();
-		for(String filename : trainFileNames) {
-			trainProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblem(filename)));
-		}
-	
-		GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(trainProblems);
-		ISeq<Phenotype<ProgramGene<Double>,Double>> populationSeq = gp.calculate();
-		List<Phenotype<ProgramGene<Double>,Double>> population = populationSeq.stream().sorted((a, b) -> Double.compare(a.fitness(), b.fitness())).collect(Collectors.toList());
 
-		Map<String, Integer> counter = new HashMap<>();
-		for(int i = 0; i < 30; i++) {
-			final Genotype<ProgramGene<Double>> programDynamic = population.get(i).genotype();
-			final TreeNode<Op<Double>> treeDynamic = programDynamic.gene().toTreeNode();
-			if(i == 0) {
-				System.out.println("Program: " + treeDynamic);
-				System.out.println("Tree depth: " + programDynamic.gene().depth());
-				System.out.println("Error train: " + (population.get(i).fitness()- treeDynamic.depth()) /1000);
-			}
-			String treeString = treeDynamic.toString();
-			String[] splittedString = treeString.split("[,()]");
-			for(String s : splittedString) {
-				if(!counter.containsKey(s)) {
-					counter.put(s, 0);
-				}
-				counter.put(s, counter.get(s) + 1);
-			}
-		}
-		
-		counter.forEach((k, v) -> System.out.println(k + ":" + v));
-		
 		folder = new File(testFolder);
 		listFiles = folder.listFiles();
 		List<String> testFileNames = new LinkedList<>();
-		for(File file : listFiles) {
-			for(int i = 0; i < numberOfClonesTest; i++) {
+		for (File file : listFiles) {
+			for (int i = 0; i < numberOfClonesTest; i++) {
 				testFileNames.add(testFolder + "/" + file.getName());
 			}
 		}
-		
-		List<GeneticProgrammingStohasticEVRP> testProblems = new LinkedList<>();
-		for(String filename : testFileNames) {
-			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblemTest(filename, new NoDistribution(), new NoDistribution(), new NoDistribution())));
+
+		try (PrintWriter writer = new PrintWriter(new FileWriter(resultsFile))) {
+
+			for (int i = 1; i <= numberOfExperiments; i++) {
+				writer.println("#EXPERIMENT:" + i);
+				
+				//training
+				List<GeneticProgrammingStohasticEVRP> trainProblems = new LinkedList<>();
+				for (String filename : trainFileNames) {
+					trainProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblem(filename)));
+				}
+				
+				GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(trainProblems);
+				ISeq<Phenotype<ProgramGene<Double>, Double>> populationSeq = gp.calculate();
+				List<Phenotype<ProgramGene<Double>, Double>> population = populationSeq.stream()
+						.sorted((a, b) -> Double.compare(a.fitness(), b.fitness())).collect(Collectors.toList());
+				
+				Map<String, Integer> counter = new HashMap<>();
+				for (int p = 0; p < 30; p++) {
+					final Genotype<ProgramGene<Double>> programDynamic = population.get(p).genotype();
+					final TreeNode<Op<Double>> treeDynamic = programDynamic.gene().toTreeNode();
+					if (p == 0) {
+						writer.println("BestProgram:" + treeDynamic);
+						writer.println("BestTreeDepth:" + programDynamic.gene().depth());
+						writer.println("ErrorTrain:" + (population.get(p).fitness() - treeDynamic.depth()) / 1000);
+					}
+					String treeString = treeDynamic.toString();
+					String[] splittedString = treeString.split("[,()]");
+					for (String s : splittedString) {
+						if(s.isBlank()) {
+							continue;
+						}
+						if (!counter.containsKey(s)) {
+							counter.put(s, 0);
+						}
+						counter.put(s, counter.get(s) + 1);
+					}
+				}		
+				counter.forEach((k, v) -> writer.println(k + ":" + v));
+				
+				//testing
+				final Genotype<ProgramGene<Double>> bestProgram = population.get(0).genotype();
+				
+				//deterministic
+				writer.println("##TEST-DETERMINISTIC-0,0,0");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new NoDistribution());
+
+				
+				//demand only
+				writer.println("##TEST-LOGNORMAL-0.1,0,0");
+				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.1), new NoDistribution(), new NoDistribution());
+				
+				writer.println("##TEST-LOGNORMAL-0.2,0,0");
+				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new NoDistribution(), new NoDistribution());
+				
+				writer.println("##TEST-LOGNORMAL-0.3,0,0");
+				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.3), new NoDistribution(), new NoDistribution());
+
+				
+				//service only
+				writer.println("##TEST-LOGNORMAL-0,0.1,0");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.1), new NoDistribution());
+			
+				writer.println("##TEST-LOGNORMAL-0,0.2,0");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.2), new NoDistribution());
+				
+				writer.println("##TEST-LOGNORMAL-0,0.3,0");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.3), new NoDistribution());
+				
+				
+				//travel only
+				writer.println("##TEST-LOGNORMAL-0,0,0.1");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new GaussianDistribution(0.1));
+				
+				writer.println("##TEST-LOGNORMAL-0,0,0.2");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new GaussianDistribution(0.2));
+				
+				writer.println("##TEST-LOGNORMAL-0,0,0.3");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new GaussianDistribution(0.3));
+				
+				//demand+service
+				writer.println("##TEST-LOGNORMAL-0.2,0.2,0");
+				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new GaussianDistribution(0.2), new NoDistribution());
+				
+				//demand+travel
+				writer.println("##TEST-LOGNORMAL-0.2,0,0.2");
+				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new NoDistribution(), new GaussianDistribution(0.2));
+				
+				//service+travel
+				writer.println("##TEST-LOGNORMAL-0,0.2,0.2");
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.2), new GaussianDistribution(0.2));
+				
+				//all-three
+				writer.println("##TEST-LOGNORMAL-0.2,0.2,0.2");
+				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new GaussianDistribution(0.2), new GaussianDistribution(0.2));
+				
+				writer.println("##TEST-LOGNORMAL-0.3,0.3,0.3");
+				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.3), new GaussianDistribution(0.3), new GaussianDistribution(0.3));
+				
+				
+				//all-three
+				writer.println("##TEST-UNIFORM-0.2,0.2,0.2");
+				test(writer, testFileNames, bestProgram, new UniformDistribution(0.2), new UniformDistribution(0.2), new UniformDistribution(0.2));
+				
+				writer.println("##TEST-UNIFORM-0.3,0.3,0.3");
+				test(writer, testFileNames, bestProgram, new UniformDistribution(0.3), new UniformDistribution(0.3), new UniformDistribution(0.3));		
+
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
-		final Genotype<ProgramGene<Double>> bestProgram = population.get(0).genotype();
-		GeneticProgrammingStohasticEVRPMultiple test = new GeneticProgrammingStohasticEVRPMultiple(testProblems);
-		double n = (test.error(bestProgram) - bestProgram.gene().depth()) / 1000;
-		System.out.println("Error test: " + n);
+		System.out.println("END");
 		System.exit(0);
-		
-		
 	}
 	
-	private static StohasticEVRPProblem generateProblemTest(String filename, Distribution demandDistribution, Distribution serviceDistribution, Distribution velocityDistribution) {
+	private static void test(PrintWriter writer, List<String> testFileNames, Genotype<ProgramGene<Double>> bestProgram, Distribution demandDistribution, Distribution serviceDistribution, Distribution velocityDistribution) {
+		List<GeneticProgrammingStohasticEVRP> testProblems = new LinkedList<>();
+		for (String filename : testFileNames) {
+			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(
+					generateProblemTest(filename, demandDistribution, serviceDistribution, velocityDistribution)));
+		}
+
+		for(int i = 0; i < testProblems.size(); i++) {
+			GeneticProgrammingStohasticEVRP problem = testProblems.get(i);
+			GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(List.of(problem));
+			double error = gp.errorWD(bestProgram) / 1000;
+			writer.println(new File(testFileNames.get(i)).getName() + ":" + error);
+		}
+	}
+
+	private static StohasticEVRPProblem generateProblemTest(String filename, Distribution demandDistribution,
+			Distribution serviceDistribution, Distribution velocityDistribution) {
 		Depot depot = null;
 		double dueDate = 0, vehicleFuelTankCapacity = 0, vehicleLoadCapacity = 0, fuelConsumptionRate = 0,
 				inverseRefuelingRate = 0, averageVelocity = 0;
@@ -194,8 +288,9 @@ public class StohasticPipeline {
 			customer.setNearestChargingStation(nearestChargingStation);
 		}
 
-		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceDistribution, velocityDistribution);
+		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity,
+				fuelConsumptionRate, inverseRefuelingRate, averageVelocity, customers, chargingStations,
+				demandDistribution, serviceDistribution, velocityDistribution);
 	}
 
 	private static StohasticEVRPProblem generateProblem(String filename) {
@@ -283,8 +378,9 @@ public class StohasticPipeline {
 			customer.setNearestChargingStation(nearestChargingStation);
 		}
 
-		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceTimeDistribution, velocityDistribution);
+		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity,
+				fuelConsumptionRate, inverseRefuelingRate, averageVelocity, customers, chargingStations,
+				demandDistribution, serviceTimeDistribution, velocityDistribution);
 	}
 
 }
