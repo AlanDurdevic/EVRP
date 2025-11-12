@@ -20,4 +20,9 @@ public class UniformDistribution implements Distribution{
 		return lambda * value;
 	}
 
+	@Override
+	public double getCV() {
+		return CV;
+	}
+
 }

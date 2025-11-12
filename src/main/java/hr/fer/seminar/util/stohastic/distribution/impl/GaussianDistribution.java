@@ -11,10 +11,13 @@ public class GaussianDistribution implements Distribution{
 	private final double stddev;
 	
 	private final Random random = new Random();
+	
+	private final double CV;
 
 	public GaussianDistribution(double CV) {
 		this.stddev = Math.sqrt(Math.log(1 + CV * CV));
 		this.mean = -(stddev * stddev) / 2;
+		this.CV = CV;
 	}
 
 	@Override
@@ -22,6 +25,11 @@ public class GaussianDistribution implements Distribution{
 		double stdNormal = random.nextGaussian();
 		double lambda = Math.exp(stddev * stdNormal + mean);
 		return lambda * value;
+	}
+
+	@Override
+	public double getCV() {
+		return CV;
 	}
 
 }

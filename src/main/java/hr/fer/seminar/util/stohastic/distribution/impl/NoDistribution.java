@@ -9,4 +9,9 @@ public class NoDistribution implements Distribution{
 		return value;
 	}
 
+	@Override
+	public double getCV() {
+		return 0;
+	}
+
 }
