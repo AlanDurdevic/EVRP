@@ -21,6 +21,7 @@ import hr.fer.seminar.entities.Location;
 import hr.fer.seminar.entities.StohasticEVRPProblem;
 import hr.fer.seminar.solution.gp.GeneticProgrammingStohasticEVRP;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPMultiple;
+import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPParallelVehicle;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSerialVehicle;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
@@ -37,7 +38,7 @@ public class StohasticPipeline {
 
 	private static final int numberOfExperiments = 10;
 
-	private static final String resultsFile = "./soft-vehicle-serial";
+	private static final String resultsFile = "./soft-vehicle-parallel";
 
 	private static final Distribution demandDistribution = new GaussianDistribution(0.2);
 
@@ -81,7 +82,7 @@ public class StohasticPipeline {
 				//training
 				List<GeneticProgrammingStohasticEVRP> trainProblems = new LinkedList<>();
 				for (String filename : trainFileNames) {
-					trainProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblem(filename)));
+					trainProblems.add(new GeneticProgrammingStohasticEVRPParallelVehicle(generateProblem(filename)));
 				}
 				
 				GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(trainProblems);
@@ -191,7 +192,7 @@ public class StohasticPipeline {
 	private static void test(PrintWriter writer, List<String> testFileNames, Genotype<ProgramGene<Double>> bestProgram, Distribution demandDistribution, Distribution serviceDistribution, Distribution velocityDistribution) {
 		List<GeneticProgrammingStohasticEVRP> testProblems = new LinkedList<>();
 		for (String filename : testFileNames) {
-			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(
+			testProblems.add(new GeneticProgrammingStohasticEVRPParallelVehicle(
 					generateProblemTest(filename, demandDistribution, serviceDistribution, velocityDistribution)));
 		}
 
