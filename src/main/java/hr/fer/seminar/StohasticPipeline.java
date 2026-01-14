@@ -39,7 +39,7 @@ public class StohasticPipeline {
 
 	private static final int numberOfExperiments = 10;
 
-	private static final String resultsFile = "./soft-vehicle-semiparallel";
+	private static final String resultsFile = "./soft-energy-serial";
 
 	private static final Distribution demandDistribution = new GaussianDistribution(0.2);
 
@@ -83,7 +83,7 @@ public class StohasticPipeline {
 				//training
 				List<GeneticProgrammingStohasticEVRP> trainProblems = new LinkedList<>();
 				for (String filename : trainFileNames) {
-					trainProblems.add(new GeneticProgrammingStohasticEVRPSemiParallelVehicle(generateProblem(filename)));
+					trainProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblem(filename)));
 				}
 				
 				GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(trainProblems);
@@ -193,7 +193,7 @@ public class StohasticPipeline {
 	private static void test(PrintWriter writer, List<String> testFileNames, Genotype<ProgramGene<Double>> bestProgram, Distribution demandDistribution, Distribution serviceDistribution, Distribution velocityDistribution) {
 		List<GeneticProgrammingStohasticEVRP> testProblems = new LinkedList<>();
 		for (String filename : testFileNames) {
-			testProblems.add(new GeneticProgrammingStohasticEVRPSemiParallelVehicle(
+			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(
 					generateProblemTest(filename, demandDistribution, serviceDistribution, velocityDistribution)));
 		}
 

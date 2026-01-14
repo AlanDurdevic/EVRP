@@ -29,9 +29,9 @@ import io.jenetics.util.ISeq;
 
 public class GeneticProgrammingStohasticEVRPMultiple{
 	
-	private static final double VEHICLE_PENALTY_CONSTANT = 1000;
+	private static final double VEHICLE_PENALTY_CONSTANT = 0;
 
-	private static final double ENERGY_PENALTY_CONSTANT = 0;
+	private static final double ENERGY_PENALTY_CONSTANT = 1000;
 	
 	private static final double LATENCY_PENALTY_CONSTANT = 0;
 	
@@ -47,7 +47,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 
 	private static final double OFFSPRING_FRACTION = 0.05;
 
-	private static final ISeq<Op<Double>> OPERATIONS = ISeq.of(MathOp.SUB, MathOp.ADD, MyMathOp.DIV, MathOp.MAX,
+	private static final ISeq<Op<Double>> OPERATIONS = ISeq.of(MathOp.SUB, MathOp.ADD, MyMathOp.DIV, MathOp.MUL, MathOp.MAX,
 			MathOp.MIN, MathOp.NEG, MyMathOp.POW2, MathOp.SQR, MathOp.EXP, MyMathOp.LOG, MyMathOp.MAX0, MyMathOp.MIN0);
 
 	private static final ISeq<Op<Double>> TERMINALS = ISeq.of(Var.of("Eni", 0), Var.of("Dni", 1), Var.of("DDni", 2),
