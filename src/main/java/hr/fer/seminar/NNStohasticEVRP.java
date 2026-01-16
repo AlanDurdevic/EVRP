@@ -22,7 +22,7 @@ import hr.fer.seminar.operators.vs.SerialVehicleSupplier;
 import hr.fer.seminar.operators.vs.VehicleSupplier;
 import hr.fer.seminar.solution.NNStohasticSolutionEVRP;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
-import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
+import hr.fer.seminar.util.stohastic.distribution.impl.LognormalDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.NoDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.UniformDistribution;
 
@@ -159,7 +159,7 @@ public class NNStohasticEVRP {
 			demandDistribution = new NoDistribution();
 			if(splittedLine[1].equals("stohastic")) {
 				if(splittedLine[2].equals("Gaussian")) {
-					demandDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+					demandDistribution = new LognormalDistribution(Double.parseDouble(splittedLine[3]));
 				}
 				else if(splittedLine[2].equals("Uniform")) {
 					demandDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
@@ -171,7 +171,7 @@ public class NNStohasticEVRP {
 			serviceTimeDistribution = new NoDistribution();
 			if(splittedLine[1].equals("stohastic")) {
 				if(splittedLine[2].equals("Gaussian")) {
-					serviceTimeDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+					serviceTimeDistribution = new LognormalDistribution(Double.parseDouble(splittedLine[3]));
 				}
 				else if(splittedLine[2].equals("Uniform")) {
 					serviceTimeDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
@@ -183,7 +183,7 @@ public class NNStohasticEVRP {
 			velocityDistribution = new NoDistribution();
 			if(splittedLine[1].equals("stohastic")) {
 				if(splittedLine[2].equals("Gaussian")) {
-					velocityDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+					velocityDistribution = new LognormalDistribution(Double.parseDouble(splittedLine[3]));
 				}
 				else if(splittedLine[2].equals("Uniform")) {
 					velocityDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
@@ -217,7 +217,7 @@ public class NNStohasticEVRP {
 		for (Customer customer : problem.getCustomers()) {
 			sum += customer.getDemand();
 		}
-		return (int) (sum / problem.getVehicleLoadCapacity()) + 1;
+		return (int) Math.ceil(sum / problem.getVehicleLoadCapacity());
 	}
 	
 	private static List<Vehicle> initializeVehicles(StohasticEVRPProblem problem) {

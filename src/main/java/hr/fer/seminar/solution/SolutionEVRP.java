@@ -361,7 +361,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		for (Customer customer : problem.getCustomers()) {
 			sum += customer.getDemand();
 		}
-		return (int) (sum / problem.getVehicleLoadCapacity()) + 1;
+		return (int) Math.ceil(sum / problem.getVehicleLoadCapacity());
 	}
 
 	protected void charge(Vehicle v, ChargingStation chargingStation) {

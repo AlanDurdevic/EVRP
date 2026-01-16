@@ -25,7 +25,7 @@ import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPParallelVe
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSemiParallelVehicle;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSerialVehicle;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
-import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
+import hr.fer.seminar.util.stohastic.distribution.impl.LognormalDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.NoDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.UniformDistribution;
 import io.jenetics.Genotype;
@@ -39,13 +39,13 @@ public class StohasticPipeline {
 
 	private static final int numberOfExperiments = 10;
 
-	private static final String resultsFile = "./soft-energy-serial";
+	private static final String resultsFile = "./proba";
 
-	private static final Distribution demandDistribution = new GaussianDistribution(0.2);
+	private static final Distribution demandDistribution = new LognormalDistribution(0.2);
 
-	private static final Distribution serviceTimeDistribution = new GaussianDistribution(0.2);
+	private static final Distribution serviceTimeDistribution = new LognormalDistribution(0.2);
 
-	private static final Distribution velocityDistribution = new GaussianDistribution(0.2);
+	private static final Distribution velocityDistribution = new LognormalDistribution(0.2);
 
 	private static final String trainFolder = "./data/stohastic/train";
 
@@ -124,54 +124,54 @@ public class StohasticPipeline {
 				
 				//demand only
 				writer.println("##TEST-LOGNORMAL-0.1,0,0");
-				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.1), new NoDistribution(), new NoDistribution());
+				test(writer, testFileNames, bestProgram, new LognormalDistribution(0.1), new NoDistribution(), new NoDistribution());
 				
 				writer.println("##TEST-LOGNORMAL-0.2,0,0");
-				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new NoDistribution(), new NoDistribution());
+				test(writer, testFileNames, bestProgram, new LognormalDistribution(0.2), new NoDistribution(), new NoDistribution());
 				
 				writer.println("##TEST-LOGNORMAL-0.3,0,0");
-				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.3), new NoDistribution(), new NoDistribution());
+				test(writer, testFileNames, bestProgram, new LognormalDistribution(0.3), new NoDistribution(), new NoDistribution());
 
 				
 				//service only
 				writer.println("##TEST-LOGNORMAL-0,0.1,0");
-				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.1), new NoDistribution());
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new LognormalDistribution(0.1), new NoDistribution());
 			
 				writer.println("##TEST-LOGNORMAL-0,0.2,0");
-				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.2), new NoDistribution());
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new LognormalDistribution(0.2), new NoDistribution());
 				
 				writer.println("##TEST-LOGNORMAL-0,0.3,0");
-				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.3), new NoDistribution());
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new LognormalDistribution(0.3), new NoDistribution());
 				
 				
 				//travel only
 				writer.println("##TEST-LOGNORMAL-0,0,0.1");
-				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new GaussianDistribution(0.1));
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new LognormalDistribution(0.1));
 				
 				writer.println("##TEST-LOGNORMAL-0,0,0.2");
-				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new GaussianDistribution(0.2));
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new LognormalDistribution(0.2));
 				
 				writer.println("##TEST-LOGNORMAL-0,0,0.3");
-				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new GaussianDistribution(0.3));
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new NoDistribution(), new LognormalDistribution(0.3));
 				
 				//demand+service
 				writer.println("##TEST-LOGNORMAL-0.2,0.2,0");
-				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new GaussianDistribution(0.2), new NoDistribution());
+				test(writer, testFileNames, bestProgram, new LognormalDistribution(0.2), new LognormalDistribution(0.2), new NoDistribution());
 				
 				//demand+travel
 				writer.println("##TEST-LOGNORMAL-0.2,0,0.2");
-				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new NoDistribution(), new GaussianDistribution(0.2));
+				test(writer, testFileNames, bestProgram, new LognormalDistribution(0.2), new NoDistribution(), new LognormalDistribution(0.2));
 				
 				//service+travel
 				writer.println("##TEST-LOGNORMAL-0,0.2,0.2");
-				test(writer, testFileNames, bestProgram, new NoDistribution(), new GaussianDistribution(0.2), new GaussianDistribution(0.2));
+				test(writer, testFileNames, bestProgram, new NoDistribution(), new LognormalDistribution(0.2), new LognormalDistribution(0.2));
 				
 				//all-three
 				writer.println("##TEST-LOGNORMAL-0.2,0.2,0.2");
-				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.2), new GaussianDistribution(0.2), new GaussianDistribution(0.2));
+				test(writer, testFileNames, bestProgram, new LognormalDistribution(0.2), new LognormalDistribution(0.2), new LognormalDistribution(0.2));
 				
 				writer.println("##TEST-LOGNORMAL-0.3,0.3,0.3");
-				test(writer, testFileNames, bestProgram, new GaussianDistribution(0.3), new GaussianDistribution(0.3), new GaussianDistribution(0.3));
+				test(writer, testFileNames, bestProgram, new LognormalDistribution(0.3), new LognormalDistribution(0.3), new LognormalDistribution(0.3));
 				
 				
 				//all-three

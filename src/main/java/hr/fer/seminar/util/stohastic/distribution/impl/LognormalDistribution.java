@@ -4,7 +4,7 @@ import java.util.Random;
 
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
 
-public class GaussianDistribution implements Distribution{
+public class LognormalDistribution implements Distribution{
 	
 	private final double mean;
 	
@@ -14,7 +14,7 @@ public class GaussianDistribution implements Distribution{
 	
 	private final double CV;
 
-	public GaussianDistribution(double CV) {
+	public LognormalDistribution(double CV) {
 		this.stddev = Math.sqrt(Math.log(1 + CV * CV));
 		this.mean = -(stddev * stddev) / 2;
 		this.CV = CV;

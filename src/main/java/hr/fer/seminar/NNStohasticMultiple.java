@@ -21,16 +21,16 @@ import hr.fer.seminar.operators.vs.SerialVehicleSupplier;
 import hr.fer.seminar.operators.vs.VehicleSupplier;
 import hr.fer.seminar.solution.NNStohasticSolutionEVRP;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
-import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
+import hr.fer.seminar.util.stohastic.distribution.impl.LognormalDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.NoDistribution;
 
 public class NNStohasticMultiple {
 	
-	private static final Distribution demandDistribution = new GaussianDistribution(0.2);
+	private static final Distribution demandDistribution = new LognormalDistribution(0.2);
 	
-	private static final Distribution serviceTimeDistribution = new GaussianDistribution(0.2);
+	private static final Distribution serviceTimeDistribution = new LognormalDistribution(0.2);
 	
-	private static final Distribution velocityDistribution = new GaussianDistribution(0.2);
+	private static final Distribution velocityDistribution = new LognormalDistribution(0.2);
 	
 	private static final String trainFolder = "./data/stohastic/train";
 	

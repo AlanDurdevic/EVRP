@@ -19,7 +19,7 @@ import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPParallelVe
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSemiParallelVehicle;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSerialVehicle;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
-import hr.fer.seminar.util.stohastic.distribution.impl.GaussianDistribution;
+import hr.fer.seminar.util.stohastic.distribution.impl.LognormalDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.NoDistribution;
 import hr.fer.seminar.util.stohastic.distribution.impl.UniformDistribution;
 import io.jenetics.Genotype;
@@ -162,7 +162,7 @@ public class StohasticEVRP {
 			demandDistribution = new NoDistribution();
 			if(splittedLine[1].equals("stohastic")) {
 				if(splittedLine[2].equals("Gaussian")) {
-					demandDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+					demandDistribution = new LognormalDistribution(Double.parseDouble(splittedLine[3]));
 				}
 				else if(splittedLine[2].equals("Uniform")) {
 					demandDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
@@ -174,7 +174,7 @@ public class StohasticEVRP {
 			serviceTimeDistribution = new NoDistribution();
 			if(splittedLine[1].equals("stohastic")) {
 				if(splittedLine[2].equals("Gaussian")) {
-					serviceTimeDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+					serviceTimeDistribution = new LognormalDistribution(Double.parseDouble(splittedLine[3]));
 				}
 				else if(splittedLine[2].equals("Uniform")) {
 					serviceTimeDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
@@ -186,7 +186,7 @@ public class StohasticEVRP {
 			velocityDistribution = new NoDistribution();
 			if(splittedLine[1].equals("stohastic")) {
 				if(splittedLine[2].equals("Gaussian")) {
-					velocityDistribution = new GaussianDistribution(Double.parseDouble(splittedLine[3]));
+					velocityDistribution = new LognormalDistribution(Double.parseDouble(splittedLine[3]));
 				}
 				else if(splittedLine[2].equals("Uniform")) {
 					velocityDistribution = new UniformDistribution(Double.parseDouble(splittedLine[3]));
