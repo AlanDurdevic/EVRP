@@ -111,7 +111,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 	}
 
 	public ISeq<Phenotype<ProgramGene<Double>,Double>> calculate() {
-		ProgramChromosome<Double> pgf = ProgramChromosome.of(STARTING_DEPTH, ch -> ch.root().size() <= MAXIMUM_DEPTH,
+		ProgramChromosome<Double> pgf = ProgramChromosome.of(STARTING_DEPTH, ch -> ch.root().depth() <= MAXIMUM_DEPTH,
 				OPERATIONS, TERMINALS);
 		final Engine<ProgramGene<Double>, Double> engine = Engine.builder(this::error, pgf).minimizing()
 				.executor(Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()))
