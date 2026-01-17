@@ -16,6 +16,7 @@ public class Customer extends Location {
 		nearestChargingStation = customer.nearestChargingStation;
 	}
 	
+	@Override
 	public ChargingStation getNearestChargingStation() {
 		if(nearestChargingStation == null) {
 			throw new NoSuchElementException();

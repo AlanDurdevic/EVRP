@@ -32,6 +32,8 @@ public abstract class Location {
 		this.dueDate = dueDate;
 		this.serviceTime = serviceTime;
 	}
+	
+	public abstract ChargingStation getNearestChargingStation();
 
 	public String getId() {
 		return id;

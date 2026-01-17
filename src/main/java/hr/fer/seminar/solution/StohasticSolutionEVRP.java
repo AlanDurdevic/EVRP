@@ -14,19 +14,19 @@ import hr.fer.seminar.operators.vs.VehicleSupplier;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
 import io.jenetics.Gene;
 
-public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends SolutionEVRP<T>{
+public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends SolutionEVRP<T> {
 
 	public StohasticSolutionEVRP(StohasticEVRPProblem problem) {
 		super(problem);
 	}
-	
+
 	@Override
 	protected List<Vehicle> getUsedVehicles(CustomerSelector cs, VehicleSupplier vehicleSupplier) {
 		StohasticEVRPProblem problem = (StohasticEVRPProblem) this.problem;
 		Distribution demandDistribution = problem.getDemandDistribution();
 		Distribution serviceTimeDistribution = problem.getServiceTimeDistribution();
 		Distribution velocityDistribution = problem.getVelocityDistribution();
-		
+
 		int numberOfVehicles = vehicleSupplier.getNumberOfVehiclesLeft();
 		List<Vehicle> usedVehicles = new ArrayList<>();
 		Depot depot = problem.getDepot();
@@ -37,51 +37,8 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			Location destination = null;
 			Vehicle v = vehicleSupplier.getVehicle();
 			Customer c = cs.selectCustomer(v, UC, problem);
-			double velocity = 0;
-			if (c == null) {
-				destination = depot;
-			} else {
-				if (v.getLoadCapacityLeft() >= c.getDemand()) {
-					double timeNeeded = Location.distance(v.getCurrentLocation(), c) / averageVelocity;
-					if (v.getCurrentTime() + timeNeeded <= c.getDueDate()) {
-						destination = c;
-					} else {
-						destination = depot;
-					}
-				} else {
-					destination = depot;
-				}
-			}
-
-			if (destination instanceof Customer && !checkIfVehicleCanReturnToDepot(v, c)) {
-				if(checkIfCanVisitChargingStationBeforeLastCustomer(v, c)) {
-					// choose charging station
-					charge(v, chooseChargingStationBeforeDepot(v, c));
-					// go to customer
-					velocity = velocityDistribution.generate(averageVelocity);
-					double distance = Location.distance(v.getCurrentLocation(), destination);
-					double time = distance / velocity;
-					v.addTime(time);
-					double fuel = fuelConsumptionRate * distance;
-					v.subtractFuelCapacity(fuel);
-					//calculate new demand and service time
-					double serviceTime = serviceTimeDistribution.generate(destination.getServiceTime());
-					double demand = demandDistribution.generate(destination.getDemand());			
-					if(demand <= v.getLoadCapacityLeft()) {
-						v.addLocation(new Customer((Customer) destination, demand, serviceTime));
-						// wait if arrive early
-						if (v.getCurrentTime() < destination.getReadyTime()) {
-							v.addTime(destination.getReadyTime() - v.getCurrentTime());
-						}
-						// serving customer
-						v.addTime(serviceTime);
-						v.subtractLoadCapacity(demand);
-						UC.remove(c);
-					}
-					else {
-						v.addLocation(new Customer((Customer) destination, 0, 0));
-					}
-				}
+			destination = c;
+			if (c == null || v.getLoadCapacityLeft() < c.getDemand()) {
 				destination = depot;
 			}
 
@@ -95,7 +52,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 				if (chargingStation == null) {
 					double fuel = fuelConsumptionRate * Location.distance(v.getCurrentLocation(), depot);
 					if (fuel > v.getFuelCapacityLeft()) {
-						chargingStation = ((Customer) v.getCurrentLocation()).getNearestChargingStation();
+						chargingStation = chooseChargingStation(v, depot);
 					}
 					destination = depot;
 				}
@@ -105,18 +62,18 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 
 			}
 			// travel to destination
-			velocity = velocityDistribution.generate(averageVelocity);
+			double velocity = velocityDistribution.generate(averageVelocity);
 			double distance = Location.distance(v.getCurrentLocation(), destination);
 			double time = distance / velocity;
 			v.addTime(time);
 			double fuel = fuelConsumptionRate * distance;
 			v.subtractFuelCapacity(fuel);
 			if (destination instanceof Customer) {
-				//calculate new demand and service time
+				// calculate new demand and service time
 				double serviceTime = serviceTimeDistribution.generate(destination.getServiceTime());
-				double demand = demandDistribution.generate(destination.getDemand());	
-				if(demand <= v.getLoadCapacityLeft()) {
-					v.addLocation(new Customer((Customer)destination, demand, serviceTime));
+				double demand = demandDistribution.generate(destination.getDemand());
+				if (demand <= v.getLoadCapacityLeft()) {
+					v.addLocation(new Customer((Customer) destination, demand, serviceTime));
 					// arrives before
 					if (v.getCurrentTime() < destination.getReadyTime()) {
 						v.addTime(destination.getReadyTime() - v.getCurrentTime());
@@ -126,16 +83,15 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 					v.subtractLoadCapacity(demand);
 					UC.remove(c);
 					vehicleSupplier.addVehicle(v);
-				}
-				else {
-					v.addLocation(new Customer((Customer)destination, 0, 0));
+				} else {
+					v.addLocation(new Customer((Customer) destination, 0, 0));
 					// check if can return to depot
 					distance = Location.distance(destination, depot);
 					fuelNeeded = distance * fuelConsumptionRate;
 					if (fuelNeeded > v.getFuelCapacityLeft()) {
-						charge(v, ((Customer) destination).getNearestChargingStation());
+						charge(v, chooseChargingStation(v, depot));
 					}
-					
+
 					destination = depot;
 					// return to depot
 					velocity = velocityDistribution.generate(averageVelocity);
@@ -165,10 +121,9 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			}
 
 		}
-
 		return usedVehicles;
 	}
-	
+
 	@Override
 	protected void charge(Vehicle v, ChargingStation chargingStation) {
 		Distribution velocityDistribution = ((StohasticEVRPProblem) problem).getVelocityDistribution();
@@ -187,4 +142,38 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		v.setFuelCapacity(problem.getVehicleFuelTankCapacity());
 	}
 
+	// choose station with lowest energy consumption
+	@Override
+	protected ChargingStation chooseChargingStation(Vehicle v, Location location) {
+		Location currentLocation = v.getCurrentLocation();
+		Location destination = location;
+		double vehicleFullTankCapacity = problem.getVehicleFuelTankCapacity();
+		double fuelConsumptionRate = problem.getFuelConsumptionRate();
+
+		ChargingStation bestChargingStation = null;
+		double bestEnergy = Double.MAX_VALUE;
+		for (ChargingStation cs : problem.getChargingStations()) {
+			double fuelCapacityLeft = v.getFuelCapacityLeft();
+			double distanceLCS = Location.distance(currentLocation, cs);
+			double fuelLCS = fuelConsumptionRate * distanceLCS;
+			fuelCapacityLeft -= fuelLCS;
+			// check if vehicle can reach charging station
+			if (fuelCapacityLeft >= 0) {
+				// get to destination from charging station
+				double distanceCSD = Location.distance(cs, destination);
+				// check if vehicle can reach destination and nearest charging station
+				double fuelNeeded = fuelConsumptionRate
+						* (distanceCSD + Location.distance(destination, destination.getNearestChargingStation()));
+				if (fuelNeeded <= vehicleFullTankCapacity) {
+					double energy = fuelConsumptionRate * (distanceLCS + distanceCSD);
+					if (energy < bestEnergy) {
+						bestChargingStation = cs;
+						bestEnergy = energy;
+					}
+				}
+
+			}
+		}
+		return bestChargingStation;
+	}
 }

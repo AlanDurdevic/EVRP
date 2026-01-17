@@ -6,4 +6,9 @@ public class ChargingStation extends Location {
 		super(id, x, y, 0, 0, dueDate, 0);
 	}
 
+	@Override
+	public ChargingStation getNearestChargingStation() {
+		return this;
+	}
+
 }

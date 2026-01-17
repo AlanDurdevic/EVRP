@@ -6,4 +6,9 @@ public class Depot extends Location {
 		super(id, x, y, 0, 0, dueDate, 0);
 	}
 
+	@Override
+	public ChargingStation getNearestChargingStation() {
+		return new ChargingStation(getId(), getX(), getY(), getDueDate());
+	}
+
 }
