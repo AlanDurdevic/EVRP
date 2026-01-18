@@ -2,8 +2,12 @@ package hr.fer.seminar.util.stohastic.distribution;
 
 public interface Distribution {
 	
-	public abstract double generate(double value);
+	double generate(double value);
 	
-	public abstract double getCV();
+	double getCV();
+	
+	void setSeed(long seed);
+	
+	Distribution copy();
 
 }

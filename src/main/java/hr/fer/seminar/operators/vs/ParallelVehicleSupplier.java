@@ -49,5 +49,10 @@ public class ParallelVehicleSupplier implements VehicleSupplier{
 		}
 		vehicles.add(new Vehicle(nextVehicleNumber++, problem.getVehicleFuelTankCapacity(), problem.getVehicleLoadCapacity(), problem.getDepot()));
 	}
+	
+	@Override
+	public Vehicle[] getVehicles() {
+		return vehicles.toArray(new Vehicle[vehicles.size()]);
+	}
 
 }

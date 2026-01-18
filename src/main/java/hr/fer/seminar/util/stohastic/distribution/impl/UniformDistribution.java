@@ -25,4 +25,14 @@ public class UniformDistribution implements Distribution{
 		return CV;
 	}
 
+	@Override
+	public void setSeed(long seed) {
+		random.setSeed(seed);
+	}
+
+	@Override
+	public Distribution copy() {
+		return new UniformDistribution(CV);
+	}
+
 }

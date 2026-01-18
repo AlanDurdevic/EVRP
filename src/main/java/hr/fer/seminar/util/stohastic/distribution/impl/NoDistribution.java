@@ -14,4 +14,14 @@ public class NoDistribution implements Distribution{
 		return 0;
 	}
 
+	@Override
+	public void setSeed(long seed) {
+		
+	}
+
+	@Override
+	public Distribution copy() {
+		return new NoDistribution();
+	}
+
 }

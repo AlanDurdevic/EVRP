@@ -15,6 +15,8 @@ public interface VehicleSupplier {
 	
 	int getNumberOfVehiclesLeft();
 	
+	Vehicle[] getVehicles();
+	
 	default void vehicleFinished(Vehicle vehicle, List<Customer> UC) {
 		
 	}

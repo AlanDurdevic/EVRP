@@ -36,7 +36,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		while (!UC.isEmpty() || vehicleSupplier.hasMoreVehicles()) {
 			Location destination = null;
 			Vehicle v = vehicleSupplier.getVehicle();
-			Customer c = cs.selectCustomer(v, UC, problem);
+			Customer c = cs.selectCustomer(v, UC, problem, vehicleSupplier.getVehicles());
 			destination = c;
 			if (c == null || v.getLoadCapacityLeft() < c.getDemand()) {
 				destination = depot;

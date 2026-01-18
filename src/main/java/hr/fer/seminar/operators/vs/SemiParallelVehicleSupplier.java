@@ -33,5 +33,10 @@ public class SemiParallelVehicleSupplier implements VehicleSupplier {
 	public int getNumberOfVehiclesLeft() {
 		return vehicles.size();
 	}
+	
+	@Override
+	public Vehicle[] getVehicles() {
+		return vehicles.toArray(new Vehicle[vehicles.size()]);
+	}
 
 }

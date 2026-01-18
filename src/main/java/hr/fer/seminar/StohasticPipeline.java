@@ -41,12 +41,6 @@ public class StohasticPipeline {
 
 	private static final String resultsFile = "./proba";
 
-	private static final Distribution demandDistribution = new LognormalDistribution(0.2);
-
-	private static final Distribution serviceTimeDistribution = new LognormalDistribution(0.2);
-
-	private static final Distribution velocityDistribution = new LognormalDistribution(0.2);
-
 	private static final String trainFolder = "./data/stohastic/train";
 
 	private static final String testFolder = "./data/stohastic/test";
@@ -54,6 +48,22 @@ public class StohasticPipeline {
 	private static final int numberOfClonesTrain = 2;
 
 	private static final int numberOfClonesTest = 6;
+	
+	private static long baseSeed = 12345L;
+	
+	private static double trainCV = 0.2;
+	
+	public static PrintWriter writerIterations;
+
+	static {
+	    try {
+	        writerIterations = new PrintWriter(
+	            new FileWriter(resultsFile + "-iterations")
+	        );
+	    } catch (IOException e) {
+	        throw new RuntimeException("Failed to initialize writerIterations", e);
+	    }
+	}
 
 	public static void main(String[] args) {
 
@@ -79,11 +89,21 @@ public class StohasticPipeline {
 
 			for (int i = 1; i <= numberOfExperiments; i++) {
 				writer.println("#EXPERIMENT:" + i);
+				writerIterations.println("#EXPERIMENT:" + i);
 				
 				//training
 				List<GeneticProgrammingStohasticEVRP> trainProblems = new LinkedList<>();
+				String currentFilename = "";
+				int currentRepIdx = 0;
 				for (String filename : trainFileNames) {
-					trainProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblem(filename)));
+					if(filename.equals(currentFilename)) {
+						currentRepIdx++;
+					}
+					else {
+						currentRepIdx = 0;
+						currentFilename = filename;
+					}
+					trainProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblemTrain(filename, currentRepIdx)));
 				}
 				
 				GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(trainProblems);
@@ -98,6 +118,7 @@ public class StohasticPipeline {
 					if (p == 0) {
 						writer.println("BestProgram:" + treeDynamic);
 						writer.println("BestTreeDepth:" + programDynamic.gene().depth());
+						writer.println("BestTreeSize:" + programDynamic.gene().size());
 						writer.println("ErrorTrain:" + (population.get(p).fitness() - treeDynamic.depth()) / 1000);
 					}
 					String treeString = treeDynamic.toString();
@@ -186,15 +207,25 @@ public class StohasticPipeline {
 			e.printStackTrace();
 		}
 		
+		writerIterations.flush();
 		System.out.println("END");
 		System.exit(0);
 	}
 	
 	private static void test(PrintWriter writer, List<String> testFileNames, Genotype<ProgramGene<Double>> bestProgram, Distribution demandDistribution, Distribution serviceDistribution, Distribution velocityDistribution) {
 		List<GeneticProgrammingStohasticEVRP> testProblems = new LinkedList<>();
+		String currentFilename = "";
+		int currentRepIdx = 0;
 		for (String filename : testFileNames) {
+			if(filename.equals(currentFilename)) {
+				currentRepIdx++;
+			}
+			else {
+				currentRepIdx = 0;
+				currentFilename = filename;
+			}
 			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(
-					generateProblemTest(filename, demandDistribution, serviceDistribution, velocityDistribution)));
+					generateProblemTest(filename, demandDistribution, serviceDistribution, velocityDistribution, currentRepIdx)));
 		}
 
 		for(int i = 0; i < testProblems.size(); i++) {
@@ -206,7 +237,7 @@ public class StohasticPipeline {
 	}
 
 	private static StohasticEVRPProblem generateProblemTest(String filename, Distribution demandDistribution,
-			Distribution serviceDistribution, Distribution velocityDistribution) {
+			Distribution serviceDistribution, Distribution velocityDistribution, int repIdx) {
 		Depot depot = null;
 		double dueDate = 0, vehicleFuelTankCapacity = 0, vehicleLoadCapacity = 0, fuelConsumptionRate = 0,
 				inverseRefuelingRate = 0, averageVelocity = 0;
@@ -289,13 +320,23 @@ public class StohasticPipeline {
 			}
 			customer.setNearestChargingStation(nearestChargingStation);
 		}
+		
+		long seed = mixSeed(baseSeed, filename, repIdx);
+		
+		demandDistribution = demandDistribution.copy();
+		serviceDistribution = serviceDistribution.copy();
+		velocityDistribution = velocityDistribution.copy();
+		
+		demandDistribution.setSeed(seed);
+		serviceDistribution.setSeed(seed + 1);
+		velocityDistribution.setSeed(seed + 2);
 
 		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity,
 				fuelConsumptionRate, inverseRefuelingRate, averageVelocity, customers, chargingStations,
 				demandDistribution, serviceDistribution, velocityDistribution);
 	}
 
-	private static StohasticEVRPProblem generateProblem(String filename) {
+	private static StohasticEVRPProblem generateProblemTrain(String filename, int repIdx) {
 
 		Depot depot = null;
 		double dueDate = 0, vehicleFuelTankCapacity = 0, vehicleLoadCapacity = 0, fuelConsumptionRate = 0,
@@ -379,10 +420,37 @@ public class StohasticPipeline {
 			}
 			customer.setNearestChargingStation(nearestChargingStation);
 		}
+		
+		long seed = mixSeed(baseSeed, filename, repIdx);
+		
+		Distribution demandDistribution = new LognormalDistribution(trainCV);
+		Distribution serviceTimeDistribution = new LognormalDistribution(trainCV);
+		Distribution velocityDistribution = new LognormalDistribution(trainCV);
+		
+		demandDistribution.setSeed(seed);
+		serviceTimeDistribution.setSeed(seed + 1);
+		velocityDistribution.setSeed(seed + 2);
 
 		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity,
 				fuelConsumptionRate, inverseRefuelingRate, averageVelocity, customers, chargingStations,
 				demandDistribution, serviceTimeDistribution, velocityDistribution);
+	}
+	
+	private static long mixSeed(long baseSeed, String fileName, int repIdx) {
+		long x = baseSeed;
+		
+		long instanceKey = (long) fileName.hashCode();
+		
+		x ^= 0x9E3779B97F4A7C15L * (instanceKey + 1L);
+		x ^= 0xC2B2AE3D27D4EB4FL * ((long) repIdx + 1L);
+		
+		x ^= (x >>> 33);
+		x *= 0xff51afd7ed558ccdL;
+		x ^= (x >>> 33);
+		x *= 0xc4ceb9fe1a85ec53L;
+		x ^= (x >>> 33);
+		
+		return x;
 	}
 
 }

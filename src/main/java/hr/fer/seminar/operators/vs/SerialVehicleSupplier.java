@@ -33,5 +33,10 @@ public class SerialVehicleSupplier implements VehicleSupplier{
 		return vehicles.size();
 	}
 
+	@Override
+	public Vehicle[] getVehicles() {
+		return vehicles.toArray(new Vehicle[vehicles.size()]);
+	}
+
 
 }

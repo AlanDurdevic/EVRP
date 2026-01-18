@@ -18,9 +18,25 @@ public class GPCustomerSelectorStohastic implements CustomerSelector{
 	}
 
 	@Override
-	public Customer selectCustomer(Vehicle vehicle, List<Customer> UC, EVRPProblem p) {
+	public Customer selectCustomer(Vehicle vehicle, List<Customer> UC, EVRPProblem p, Vehicle[] vehicles) {
 		if (UC.isEmpty()) {
 			return null;
+		}
+	
+		double UCn = UC.size();
+		
+		double DsumUC = 0;
+		for(Customer customer : UC) {
+			DsumUC += customer.getDemand();
+		}
+		
+		double CsumV = 0;
+		double CminV = Double.MAX_VALUE;
+		for(Vehicle v : vehicles) {
+			CsumV += v.getLoadCapacityLeft();
+			if(v.getLoadCapacityLeft() < CminV) {
+				CminV = v.getLoadCapacityLeft();
+			}
 		}
 		
 		StohasticEVRPProblem problem = (StohasticEVRPProblem) p;
@@ -65,7 +81,8 @@ public class GPCustomerSelectorStohastic implements CustomerSelector{
 			double Var_Tij = problem.getVelocityDistribution().getCV();
 			double Slack_TW = customer.getDueDate() - vehicle.getCurrentTime();
 
-			Double[] arguments = { Eni, Dni, DDni, STni, RTni, Evk, Cvk, Tvk, ECni, ERPni, EDepni, ERPpvk, EDeppvk, Var_Dni, Var_Sni, Var_Tij, Slack_TW};
+			Double[] arguments = { Eni, Dni, DDni, STni, RTni, Evk, Cvk, Tvk, ECni, ERPni, EDepni, ERPpvk, EDeppvk, Var_Dni, Var_Sni, Var_Tij, Slack_TW,
+					UCn, DsumUC, CsumV, CminV};
 			double customerPriority = program.apply(arguments);
 			if (customerPriority > bestPriority) {
 				bestPriority = customerPriority;

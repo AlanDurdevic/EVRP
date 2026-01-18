@@ -53,7 +53,8 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 	private static final ISeq<Op<Double>> TERMINALS = ISeq.of(Var.of("Eni", 0), Var.of("Dni", 1), Var.of("DDni", 2),
 			Var.of("STni", 3), Var.of("RTni", 4), Var.of("Evk", 5), Var.of("Cvk", 6), Var.of("Tvk", 7),
 			Var.of("ECni", 8), Var.of("ERPni", 9), Var.of("EDepni", 10), Var.of("ERPpvk", 11), Var.of("EDeppvk", 12),
-			Var.of("Var_Dni", 13),Var.of("Var_Sni", 14),Var.of("Var_Tij", 15),Var.of("Slack_TW", 16),
+			Var.of("Var_Dni", 13),Var.of("Var_Sni", 14),Var.of("Var_Tij", 15),Var.of("Slack_TW", 16), Var.of("UC", 17),
+			Var.of("DsumUC", 18), Var.of("CsumV", 19), Var.of("CminV", 20),
 			EphemeralConst.of(() -> ((double) random().nextInt(11)) / 10));
 
 	private final List<GeneticProgrammingStohasticEVRP> problems;

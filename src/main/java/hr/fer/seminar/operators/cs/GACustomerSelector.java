@@ -20,7 +20,7 @@ public class GACustomerSelector implements CustomerSelector{
 	}
 
 	@Override
-	public Customer selectCustomer(Vehicle v, List<Customer> UC, EVRPProblem problem) {
+	public Customer selectCustomer(Vehicle v, List<Customer> UC, EVRPProblem problem, Vehicle[] vehicles) {
 		for (int i = 0; i < c.validAlleles().size(); i++) {
 			Integer currentNode = c.get(i).allele();
 			Customer currentCustomer = customerMap.get(currentNode);

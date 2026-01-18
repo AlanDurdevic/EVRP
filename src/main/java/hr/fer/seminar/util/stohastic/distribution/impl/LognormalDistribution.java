@@ -32,4 +32,14 @@ public class LognormalDistribution implements Distribution{
 		return CV;
 	}
 
+	@Override
+	public void setSeed(long seed) {
+		random.setSeed(seed);
+	}
+
+	@Override
+	public Distribution copy() {
+		return new LognormalDistribution(CV);
+	}
+
 }

@@ -17,7 +17,7 @@ public class GPCustomerSelector implements CustomerSelector{
 	}
 
 	@Override
-	public Customer selectCustomer(Vehicle vehicle, List<Customer> UC, EVRPProblem problem) {
+	public Customer selectCustomer(Vehicle vehicle, List<Customer> UC, EVRPProblem problem, Vehicle[] vehicles) {
 		if (UC.isEmpty()) {
 			return null;
 		}

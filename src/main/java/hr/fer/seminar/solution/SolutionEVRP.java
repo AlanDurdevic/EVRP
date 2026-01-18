@@ -66,7 +66,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		while (!UC.isEmpty() || vehicleSupplier.hasMoreVehicles()) {
 			Location destination = null;
 			Vehicle v = vehicleSupplier.getVehicle();
-			Customer c = cs.selectCustomer(v, UC, problem);
+			Customer c = cs.selectCustomer(v, UC, problem, vehicleSupplier.getVehicles());
 			if (c == null) {
 				destination = depot;
 			} else {

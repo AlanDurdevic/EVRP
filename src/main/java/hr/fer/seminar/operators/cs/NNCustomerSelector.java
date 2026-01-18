@@ -10,7 +10,7 @@ import hr.fer.seminar.entities.Vehicle;
 public class NNCustomerSelector implements CustomerSelector{
 
 	@Override
-	public Customer selectCustomer(Vehicle v, List<Customer> UC, EVRPProblem problem) {
+	public Customer selectCustomer(Vehicle v, List<Customer> UC, EVRPProblem problem, Vehicle[] vehicles) {
 		if(UC.isEmpty())
 			return null;
 		Location currentLocation = v.getCurrentLocation();
