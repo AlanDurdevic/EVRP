@@ -37,9 +37,9 @@ import io.jenetics.util.ISeq;
 
 public class StohasticPipeline {
 
-	private static final int numberOfExperiments = 1;
+	private static final int numberOfExperiments = 10;
 
-	private static final String resultsFile = "./proba";
+	private static final String resultsFile = "./vehicle-serial";
 
 	private static final String trainFolder = "./data/stohastic/train";
 
