@@ -1,8 +1,0 @@
-1. Funkcija pogreške
-Funkcija pogreške određuje se u razredu GeneticProgrammingStohasticEVRPMultiple i tamo ručno postavljam prije svakog pokretanja (npr. vehicle-serial) koji kriterij optimiram.
-Optimiram po samo jednom parametru i dubini stabla. Taj parametar ima veći koeficijent od 1 kako dubina stabla ne bi previše utjecala, odnosno kako bi utjecala samo ako su potpuno identični po traženom kriteriju.
-
-2.Hard policy
-Kod je implementiran iz koda determinističke varijante. Taj policy služi kako bi se vozilo vratilo u depo. Bez tog policy-a vozilo se vraća u depo samo kada nema kapacitet da posluži kupca. Također, mora se i kasniji kod promijeniti ako se uklanja taj dio jer ima još "hard" stvari. Trebalo bi revidirati i funkcije: checkIfVehicleCanReturnToDepot, checkIfCanVisitChargingStationBeforeLastCustomer, chooseChargingStationBeforeDepot, chooseChargingStation.
-
-3. RNG nije seedan, singletoni?
