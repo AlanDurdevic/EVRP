@@ -29,15 +29,15 @@ import io.jenetics.util.ISeq;
 
 public class GeneticProgrammingStohasticEVRPMultiple{
 	
-	private static final double VEHICLE_PENALTY_CONSTANT = 1000;
+	private static final double VEHICLE_PENALTY_CONSTANT = 0;
 
 	private static final double ENERGY_PENALTY_CONSTANT = 0;
 	
-	private static final double LATENCY_PENALTY_CONSTANT = 0;
+	private static final double LATENCY_PENALTY_CONSTANT = 1000;
 	
 	private final static int MAXIMUM_DEPTH = 255;
 
-	private final static int STARTING_DEPTH = 10;
+	private final static int STARTING_DEPTH = 5;
 
 	private static final int POPULATION_SIZE = 200;
 
@@ -48,14 +48,14 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 	private static final double OFFSPRING_FRACTION = 0.05;
 
 	private static final ISeq<Op<Double>> OPERATIONS = ISeq.of(MathOp.SUB, MathOp.ADD, MyMathOp.DIV, MathOp.MUL, MathOp.MAX,
-			MathOp.MIN, MathOp.NEG, MyMathOp.POW2, MathOp.SQR, MathOp.EXP, MyMathOp.LOG, MyMathOp.MAX0, MyMathOp.MIN0);
+			MathOp.MIN, MathOp.NEG, MyMathOp.POW2, MyMathOp.SQR, MathOp.EXP, MyMathOp.LOG, MyMathOp.MAX0, MyMathOp.MIN0);
 
 	private static final ISeq<Op<Double>> TERMINALS = ISeq.of(Var.of("Eni", 0), Var.of("Dni", 1), Var.of("DDni", 2),
 			Var.of("STni", 3), Var.of("RTni", 4), Var.of("Evk", 5), Var.of("Cvk", 6), Var.of("Tvk", 7),
 			Var.of("ECni", 8), Var.of("ERPni", 9), Var.of("EDepni", 10), Var.of("ERPpvk", 11), Var.of("EDeppvk", 12),
 			Var.of("Var_Dni", 13),Var.of("Var_Sni", 14),Var.of("Var_Tij", 15),Var.of("Slack_TW", 16), Var.of("UC", 17),
-			Var.of("DsumUC", 18), Var.of("CsumV", 19), Var.of("CminV", 20),
-			EphemeralConst.of(() -> ((double) random().nextInt(11)) / 10));
+			Var.of("DsumUC", 18), Var.of("CsumV", 19), Var.of("BestOtherETA_i", 20), Var.of("Slack_Self", 21),
+			EphemeralConst.of(() -> (random().nextInt(11) / 10.)));
 
 	private final List<GeneticProgrammingStohasticEVRP> problems;
 	
@@ -83,7 +83,7 @@ public class GeneticProgrammingStohasticEVRPMultiple{
 			}
 		}
 		return ENERGY_PENALTY_CONSTANT * fuel
-				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency + gt.gene().depth();
+				+ VEHICLE_PENALTY_CONSTANT * vehiclesNumber + LATENCY_PENALTY_CONSTANT * latency + gt.gene().size();
 		
 	}
 	

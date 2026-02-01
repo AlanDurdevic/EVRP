@@ -39,7 +39,7 @@ public class StohasticPipeline {
 
 	private static final int numberOfExperiments = 10;
 
-	private static final String resultsFile = "./vehicle-serial";
+	private static final String resultsFile = "./tardiness-parallel";
 
 	private static final String trainFolder = "./data/stohastic/train";
 
@@ -103,7 +103,7 @@ public class StohasticPipeline {
 						currentRepIdx = 0;
 						currentFilename = filename;
 					}
-					trainProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(generateProblemTrain(filename, currentRepIdx)));
+					trainProblems.add(new GeneticProgrammingStohasticEVRPParallelVehicle(generateProblemTrain(filename, currentRepIdx)));
 				}
 				
 				GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(trainProblems);
@@ -119,7 +119,7 @@ public class StohasticPipeline {
 						writer.println("BestProgram:" + treeDynamic);
 						writer.println("BestTreeDepth:" + programDynamic.gene().depth());
 						writer.println("BestTreeSize:" + programDynamic.gene().size());
-						writer.println("ErrorTrain:" + (population.get(p).fitness() - treeDynamic.depth()) / 1000);
+						writer.println("ErrorTrain:" + (population.get(p).fitness() - treeDynamic.size()) / 1000);
 					}
 					String treeString = treeDynamic.toString();
 					String[] splittedString = treeString.split("[,()]");
@@ -224,7 +224,7 @@ public class StohasticPipeline {
 				currentRepIdx = 0;
 				currentFilename = filename;
 			}
-			testProblems.add(new GeneticProgrammingStohasticEVRPSerialVehicle(
+			testProblems.add(new GeneticProgrammingStohasticEVRPParallelVehicle(
 					generateProblemTest(filename, demandDistribution, serviceDistribution, velocityDistribution, currentRepIdx)));
 		}
 

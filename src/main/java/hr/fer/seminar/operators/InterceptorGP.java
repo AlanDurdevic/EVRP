@@ -14,7 +14,7 @@ public class InterceptorGP implements EvolutionInterceptor<ProgramGene<Double>, 
 		if(start.generation() > 1) {
 			double bestFitness = Double.MAX_VALUE;
 			for(var gene : start.population()) {
-				double fitness = (gene.fitness() - gene.genotype().gene().depth()) / 1000;
+				double fitness = (gene.fitness() - gene.genotype().gene().size()) / 1000;
 				if(fitness < bestFitness) {
 					bestFitness = fitness;
 				}

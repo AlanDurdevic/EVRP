@@ -1,285 +1,341 @@
 package hr.fer.seminar;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
-import hr.fer.seminar.entities.ChargingStation;
-import hr.fer.seminar.entities.Customer;
-import hr.fer.seminar.entities.Depot;
-import hr.fer.seminar.entities.Location;
-import hr.fer.seminar.entities.StohasticEVRPProblem;
-import hr.fer.seminar.entities.Vehicle;
+import hr.fer.seminar.entities.*;
 import hr.fer.seminar.operators.cs.CustomerSelector;
 import hr.fer.seminar.operators.cs.NNCustomerSelector;
 import hr.fer.seminar.operators.vs.SerialVehicleSupplier;
 import hr.fer.seminar.operators.vs.VehicleSupplier;
 import hr.fer.seminar.solution.NNStohasticSolutionEVRP;
 import hr.fer.seminar.util.stohastic.distribution.Distribution;
-import hr.fer.seminar.util.stohastic.distribution.impl.LognormalDistribution;
-import hr.fer.seminar.util.stohastic.distribution.impl.NoDistribution;
+import hr.fer.seminar.util.stohastic.distribution.impl.*;
 
 public class NNStohasticMultiple {
-	
-	private static final Distribution demandDistribution = new LognormalDistribution(0.2);
-	
-	private static final Distribution serviceTimeDistribution = new LognormalDistribution(0.2);
-	
-	private static final Distribution velocityDistribution = new LognormalDistribution(0.2);
-	
-	private static final String trainFolder = "./data/stohastic/train";
-	
-	private static final String testFolder = "./data/stohastic/test";
-	
-	private static final int numberOfClonesTrain = 2;
-	
-	private static final int numberOfClonesTest = 5;
-		
-	public static void main(String[] args) {
-		
-		File folder = new File(trainFolder);
-		File[] listFiles = folder.listFiles();
-		List<String> trainFileNames = new LinkedList<>();
-		for(File file : listFiles) {
-			for(int i = 0; i < numberOfClonesTrain; i++) {
-				trainFileNames.add(trainFolder + "/" + file.getName());
-			}
-		}
-		CustomerSelector cs = new NNCustomerSelector();
-		int vehiclesNumber = 0;
-		for(String filename : trainFileNames) {
-			StohasticEVRPProblem problem = generateProblem(filename);
-			List<Vehicle> vehicles = initializeVehicles(problem);
-			VehicleSupplier vs = new SerialVehicleSupplier(vehicles);
-			NNStohasticSolutionEVRP<?> solution = new NNStohasticSolutionEVRP<>(problem, cs, vs);
-			vehiclesNumber += solution.getUsedVehicles().size();
-		}
-		System.out.println("Number of vehicles train: " + vehiclesNumber);
-		
-		
-		folder = new File(testFolder);
-		listFiles = folder.listFiles();
-		List<String> testFileNames = new LinkedList<>();
-		for(File file : listFiles) {
-			for(int i = 0; i < numberOfClonesTest; i++) {
-				testFileNames.add(testFolder + "/" + file.getName());
-			}
-		}
-		vehiclesNumber = 0;
-		for(String filename : testFileNames) {
-			StohasticEVRPProblem problem = generateProblemTest(filename);
-			List<Vehicle> vehicles = initializeVehicles(problem);
-			VehicleSupplier vs = new SerialVehicleSupplier(vehicles);
-			NNStohasticSolutionEVRP<?> solution = new NNStohasticSolutionEVRP<>(problem, cs, vs);
-			vehiclesNumber += solution.getUsedVehicles().size();
-		}
-		System.out.println("Number of vehicles test: " + vehiclesNumber);
-	
-		
-		
-	}
-	
-	private static StohasticEVRPProblem generateProblem(String filename) {
 
-		Depot depot = null;
-		double dueDate = 0, vehicleFuelTankCapacity = 0, vehicleLoadCapacity = 0, fuelConsumptionRate = 0,
-				inverseRefuelingRate = 0, averageVelocity = 0;
-		List<Customer> customers = new ArrayList<>();
-		List<ChargingStation> chargingStations = new ArrayList<>();
+    private static final String resultsFile = "./nn-vehicle-serial";
 
-		try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
-			br.readLine();
-			while (true) {
-				String line = br.readLine();
-				if (line.isBlank()) {
-					break;
-				}
+    private static final String trainFolder = "./data/stohastic/train";
+    private static final String testFolder  = "./data/stohastic/test";
 
-				String[] splittedLine = line.split("\\s+");
-				char locationTag = splittedLine[0].charAt(0);
-				switch (locationTag) {
-				case 'D' -> {
-					String id = splittedLine[0];
-					double x = Double.parseDouble(splittedLine[2]);
-					double y = Double.parseDouble(splittedLine[3]);
-					dueDate = Double.parseDouble(splittedLine[6]);
-					depot = new Depot(id, x, y, dueDate);
-				}
-				case 'S' -> {
-					String id = splittedLine[0];
-					double x = Double.parseDouble(splittedLine[2]);
-					double y = Double.parseDouble(splittedLine[3]);
-					ChargingStation newChargingStation = new ChargingStation(id, x, y, dueDate);
-					chargingStations.add(newChargingStation);
-				}
-				case 'C' -> {
-					String id = splittedLine[0];
-					double x = Double.parseDouble(splittedLine[2]);
-					double y = Double.parseDouble(splittedLine[3]);
-					double demand = Double.parseDouble(splittedLine[4]);
-					double readyTime = Double.parseDouble(splittedLine[5]);
-					double dueDateCustomer = Double.parseDouble(splittedLine[6]);
-					double serviceTime = Double.parseDouble(splittedLine[7]);
-					Customer newCustomer = new Customer(id, x, y, demand, readyTime, dueDateCustomer, serviceTime);
-					customers.add(newCustomer);
-				}
-				}
-			}
+    private static final int numberOfClonesTrain = 2;
+    private static final int numberOfClonesTest  = 6;
 
-			String line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			vehicleFuelTankCapacity = Double.parseDouble(line);
+    private static final long baseSeed = 12345L;
+    private static final double trainCV = 0.2;
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			vehicleLoadCapacity = Double.parseDouble(line);
+    public static void main(String[] args) {
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			fuelConsumptionRate = Double.parseDouble(line);
+        List<String> trainFiles = collect(trainFolder, numberOfClonesTrain);
+        List<String> testFiles  = collect(testFolder, numberOfClonesTest);
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			inverseRefuelingRate = Double.parseDouble(line);
+        CustomerSelector cs = new NNCustomerSelector();
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			averageVelocity = Double.parseDouble(line);
+        try (PrintWriter writer = new PrintWriter(new FileWriter(resultsFile))) {
 
-		} catch (IOException e) {
-			System.err.println("Error while opening file: " + filename);
-			System.exit(2);
-		}
+            /* ================= TRAIN ================= */
 
-		for (Customer customer : customers) {
-			ChargingStation nearestChargingStation = null;
-			double nearestDistance = Double.MAX_VALUE;
-			for (ChargingStation chargingStation : chargingStations) {
-				double newDistance = Location.distance(customer, chargingStation);
-				if (newDistance < nearestDistance) {
-					nearestChargingStation = chargingStation;
-					nearestDistance = newDistance;
-				}
-			}
-			customer.setNearestChargingStation(nearestChargingStation);
-		}
+            writer.println("#TRAIN");
+            int vehiclesTrain = 0;
 
-		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceTimeDistribution, velocityDistribution);
-	}
-	
-	private static int getLUNumberOfVehicles(StohasticEVRPProblem problem) {
-		double sum = 0;
-		for (Customer customer : problem.getCustomers()) {
-			sum += customer.getDemand();
-		}
-		return (int) (sum / problem.getVehicleLoadCapacity()) + 1;
-	}
-	
-	private static List<Vehicle> initializeVehicles(StohasticEVRPProblem problem) {
-		int LB = getLUNumberOfVehicles(problem);
-		List<Vehicle> V = new ArrayList<>();
-		Depot startingLocation = problem.getDepot();
-		double fuelCapacity = problem.getVehicleFuelTankCapacity();
-		double loadCapacity = problem.getVehicleLoadCapacity();
-		for (int i = 0; i < LB; i++) {
-			Vehicle newVehicle = new Vehicle(i, fuelCapacity, loadCapacity, startingLocation);
-			V.add(newVehicle);
-		}
-		return V;
-	}
-	
-	private static StohasticEVRPProblem generateProblemTest(String filename) {
-		Depot depot = null;
-		double dueDate = 0, vehicleFuelTankCapacity = 0, vehicleLoadCapacity = 0, fuelConsumptionRate = 0,
-				inverseRefuelingRate = 0, averageVelocity = 0;
-		List<Customer> customers = new ArrayList<>();
-		List<ChargingStation> chargingStations = new ArrayList<>();
+            for (int i = 0; i < trainFiles.size(); i++) {
+                String f = trainFiles.get(i);
+                int rep = repetitionIndex(trainFiles, i);
+                vehiclesTrain += solve(generateTrainProblem(f, rep), cs);
+            }
 
-		try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
-			br.readLine();
-			while (true) {
-				String line = br.readLine();
-				if (line.isBlank()) {
-					break;
-				}
+            writer.println("TotalVehiclesTrain:" + vehiclesTrain);
 
-				String[] splittedLine = line.split("\\s+");
-				char locationTag = splittedLine[0].charAt(0);
-				switch (locationTag) {
-				case 'D' -> {
-					String id = splittedLine[0];
-					double x = Double.parseDouble(splittedLine[2]);
-					double y = Double.parseDouble(splittedLine[3]);
-					dueDate = Double.parseDouble(splittedLine[6]);
-					depot = new Depot(id, x, y, dueDate);
-				}
-				case 'S' -> {
-					String id = splittedLine[0];
-					double x = Double.parseDouble(splittedLine[2]);
-					double y = Double.parseDouble(splittedLine[3]);
-					ChargingStation newChargingStation = new ChargingStation(id, x, y, dueDate);
-					chargingStations.add(newChargingStation);
-				}
-				case 'C' -> {
-					String id = splittedLine[0];
-					double x = Double.parseDouble(splittedLine[2]);
-					double y = Double.parseDouble(splittedLine[3]);
-					double demand = Double.parseDouble(splittedLine[4]);
-					double readyTime = Double.parseDouble(splittedLine[5]);
-					double dueDateCustomer = Double.parseDouble(splittedLine[6]);
-					double serviceTime = Double.parseDouble(splittedLine[7]);
-					Customer newCustomer = new Customer(id, x, y, demand, readyTime, dueDateCustomer, serviceTime);
-					customers.add(newCustomer);
-				}
-				}
-			}
+            /* ================= TESTS (IDENTICAL TO GP) ================= */
 
-			String line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			vehicleFuelTankCapacity = Double.parseDouble(line);
+            writer.println("##TEST-DETERMINISTIC-0,0,0");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new NoDistribution(),
+                    new NoDistribution());
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			vehicleLoadCapacity = Double.parseDouble(line);
+            writer.println("##TEST-LOGNORMAL-0.1,0,0");
+            test(writer, testFiles, cs,
+                    new LognormalDistribution(0.1),
+                    new NoDistribution(),
+                    new NoDistribution());
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			fuelConsumptionRate = Double.parseDouble(line);
+            writer.println("##TEST-LOGNORMAL-0.2,0,0");
+            test(writer, testFiles, cs,
+                    new LognormalDistribution(0.2),
+                    new NoDistribution(),
+                    new NoDistribution());
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			inverseRefuelingRate = Double.parseDouble(line);
+            writer.println("##TEST-LOGNORMAL-0.3,0,0");
+            test(writer, testFiles, cs,
+                    new LognormalDistribution(0.3),
+                    new NoDistribution(),
+                    new NoDistribution());
 
-			line = br.readLine();
-			line = line.substring(line.indexOf('/') + 1, line.length() - 1);
-			averageVelocity = Double.parseDouble(line);
+            writer.println("##TEST-LOGNORMAL-0,0.1,0");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new LognormalDistribution(0.1),
+                    new NoDistribution());
 
-		} catch (IOException e) {
-			System.err.println("Error while opening file: " + filename);
-			System.exit(2);
-		}
+            writer.println("##TEST-LOGNORMAL-0,0.2,0");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new LognormalDistribution(0.2),
+                    new NoDistribution());
 
-		for (Customer customer : customers) {
-			ChargingStation nearestChargingStation = null;
-			double nearestDistance = Double.MAX_VALUE;
-			for (ChargingStation chargingStation : chargingStations) {
-				double newDistance = Location.distance(customer, chargingStation);
-				if (newDistance < nearestDistance) {
-					nearestChargingStation = chargingStation;
-					nearestDistance = newDistance;
-				}
-			}
-			customer.setNearestChargingStation(nearestChargingStation);
-		}
+            writer.println("##TEST-LOGNORMAL-0,0.3,0");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new LognormalDistribution(0.3),
+                    new NoDistribution());
 
-		return new StohasticEVRPProblem(depot, dueDate, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, new NoDistribution(), new NoDistribution(), new NoDistribution());
-	}
+            writer.println("##TEST-LOGNORMAL-0,0,0.1");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new NoDistribution(),
+                    new LognormalDistribution(0.1));
 
+            writer.println("##TEST-LOGNORMAL-0,0,0.2");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new NoDistribution(),
+                    new LognormalDistribution(0.2));
+
+            writer.println("##TEST-LOGNORMAL-0,0,0.3");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new NoDistribution(),
+                    new LognormalDistribution(0.3));
+
+            writer.println("##TEST-LOGNORMAL-0.2,0.2,0");
+            test(writer, testFiles, cs,
+                    new LognormalDistribution(0.2),
+                    new LognormalDistribution(0.2),
+                    new NoDistribution());
+
+            writer.println("##TEST-LOGNORMAL-0.2,0,0.2");
+            test(writer, testFiles, cs,
+                    new LognormalDistribution(0.2),
+                    new NoDistribution(),
+                    new LognormalDistribution(0.2));
+
+            writer.println("##TEST-LOGNORMAL-0,0.2,0.2");
+            test(writer, testFiles, cs,
+                    new NoDistribution(),
+                    new LognormalDistribution(0.2),
+                    new LognormalDistribution(0.2));
+
+            writer.println("##TEST-LOGNORMAL-0.2,0.2,0.2");
+            test(writer, testFiles, cs,
+                    new LognormalDistribution(0.2),
+                    new LognormalDistribution(0.2),
+                    new LognormalDistribution(0.2));
+
+            writer.println("##TEST-LOGNORMAL-0.3,0.3,0.3");
+            test(writer, testFiles, cs,
+                    new LognormalDistribution(0.3),
+                    new LognormalDistribution(0.3),
+                    new LognormalDistribution(0.3));
+
+            writer.println("##TEST-UNIFORM-0.2,0.2,0.2");
+            test(writer, testFiles, cs,
+                    new UniformDistribution(0.2),
+                    new UniformDistribution(0.2),
+                    new UniformDistribution(0.2));
+
+            writer.println("##TEST-UNIFORM-0.3,0.3,0.3");
+            test(writer, testFiles, cs,
+                    new UniformDistribution(0.3),
+                    new UniformDistribution(0.3),
+                    new UniformDistribution(0.3));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("END");
+        System.exit(0);
+    }
+
+    /* ================= TEST EXECUTION ================= */
+
+    private static void test(PrintWriter writer, List<String> files,
+                             CustomerSelector cs,
+                             Distribution d, Distribution s, Distribution v) {
+
+        for (int i = 0; i < files.size(); i++) {
+            String f = files.get(i);
+            int rep = repetitionIndex(files, i);
+            StohasticEVRPProblem p = generateTestProblem(f, d, s, v, rep);
+            int vehicles = solve(p, cs);
+            writer.println(new File(f).getName() + ":" + vehicles);
+        }
+    }
+
+    private static int solve(StohasticEVRPProblem problem, CustomerSelector cs) {
+        List<Vehicle> vehicles = initializeVehicles(problem);
+        VehicleSupplier vs = new SerialVehicleSupplier(vehicles);
+        return new NNStohasticSolutionEVRP<>(problem, cs, vs)
+                .getUsedVehicles().size();
+    }
+
+    /* ================= FILE HANDLING ================= */
+
+    private static List<String> collect(String folder, int clones) {
+        List<String> result = new LinkedList<>();
+        for (File f : new File(folder).listFiles()) {
+            for (int i = 0; i < clones; i++) {
+                result.add(folder + "/" + f.getName());
+            }
+        }
+        return result;
+    }
+
+    private static int repetitionIndex(List<String> list, int idx) {
+        int r = 0;
+        for (int i = idx - 1; i >= 0 && list.get(i).equals(list.get(idx)); i--) {
+            r++;
+        }
+        return r;
+    }
+
+    private static long mixSeed(long baseSeed, String filename, int repIdx) {
+        long x = baseSeed;
+        long instanceKey = filename.hashCode();
+        x ^= 0x9E3779B97F4A7C15L * (instanceKey + 1L);
+        x ^= 0xC2B2AE3D27D4EB4FL * ((long) repIdx + 1L);
+        x ^= (x >>> 33);
+        x *= 0xff51afd7ed558ccdL;
+        x ^= (x >>> 33);
+        x *= 0xc4ceb9fe1a85ec53L;
+        x ^= (x >>> 33);
+        return x;
+    }
+
+    /* ================= PROBLEM GENERATION ================= */
+
+    private static StohasticEVRPProblem generateTrainProblem(String filename, int repIdx) {
+        Distribution d = new LognormalDistribution(trainCV);
+        Distribution s = new LognormalDistribution(trainCV);
+        Distribution v = new LognormalDistribution(trainCV);
+
+        long seed = mixSeed(baseSeed, filename, repIdx);
+        d.setSeed(seed);
+        s.setSeed(seed + 1);
+        v.setSeed(seed + 2);
+
+        return parseProblem(filename, d, s, v);
+    }
+
+    private static StohasticEVRPProblem generateTestProblem(
+            String filename,
+            Distribution d, Distribution s, Distribution v,
+            int repIdx) {
+
+        d = d.copy();
+        s = s.copy();
+        v = v.copy();
+
+        long seed = mixSeed(baseSeed, filename, repIdx);
+        d.setSeed(seed);
+        s.setSeed(seed + 1);
+        v.setSeed(seed + 2);
+
+        return parseProblem(filename, d, s, v);
+    }
+
+    private static StohasticEVRPProblem parseProblem(
+            String filename,
+            Distribution demand,
+            Distribution service,
+            Distribution velocity) {
+
+        Depot depot = null;
+        double dueDate = 0, tank = 0, load = 0, cons = 0, refuel = 0, avgVel = 0;
+        List<Customer> customers = new ArrayList<>();
+        List<ChargingStation> stations = new ArrayList<>();
+
+        try (BufferedReader br = Files.newBufferedReader(Paths.get(filename))) {
+            br.readLine();
+            while (true) {
+                String line = br.readLine();
+                if (line.isBlank()) break;
+
+                String[] s = line.split("\\s+");
+                switch (s[0].charAt(0)) {
+                    case 'D' -> {
+                        depot = new Depot(
+                                s[0],
+                                Double.parseDouble(s[2]),
+                                Double.parseDouble(s[3]),
+                                Double.parseDouble(s[6]));
+                        dueDate = depot.getDueDate();
+                    }
+                    case 'S' -> stations.add(new ChargingStation(
+                            s[0],
+                            Double.parseDouble(s[2]),
+                            Double.parseDouble(s[3]),
+                            dueDate));
+                    case 'C' -> customers.add(new Customer(
+                            s[0],
+                            Double.parseDouble(s[2]),
+                            Double.parseDouble(s[3]),
+                            Double.parseDouble(s[4]),
+                            Double.parseDouble(s[5]),
+                            Double.parseDouble(s[6]),
+                            Double.parseDouble(s[7])));
+                }
+            }
+
+            tank   = Double.parseDouble(br.readLine().split("/")[1].replace(";", ""));
+            load   = Double.parseDouble(br.readLine().split("/")[1].replace(";", ""));
+            cons   = Double.parseDouble(br.readLine().split("/")[1].replace(";", ""));
+            refuel = Double.parseDouble(br.readLine().split("/")[1].replace(";", ""));
+            avgVel = Double.parseDouble(br.readLine().split("/")[1].replace(";", ""));
+
+        } catch (IOException e) {
+            throw new RuntimeException("Error reading: " + filename, e);
+        }
+
+        for (Customer c : customers) {
+            ChargingStation best = null;
+            double bestD = Double.MAX_VALUE;
+            for (ChargingStation s : stations) {
+                double d = Location.distance(c, s);
+                if (d < bestD) {
+                    bestD = d;
+                    best = s;
+                }
+            }
+            c.setNearestChargingStation(best);
+        }
+
+        return new StohasticEVRPProblem(
+                depot, dueDate, tank, load, cons, refuel, avgVel,
+                customers, stations,
+                demand, service, velocity);
+    }
+
+    private static List<Vehicle> initializeVehicles(StohasticEVRPProblem p) {
+        double sum = 0;
+        for (Customer c : p.getCustomers()) {
+            sum += c.getDemand();
+        }
+
+        int LB = (int) (sum / p.getVehicleLoadCapacity()) + 1;
+        List<Vehicle> vehicles = new ArrayList<>();
+
+        for (int i = 0; i < LB; i++) {
+            vehicles.add(new Vehicle(
+                    i,
+                    p.getVehicleFuelTankCapacity(),
+                    p.getVehicleLoadCapacity(),
+                    p.getDepot()));
+        }
+        return vehicles;
+    }
 }

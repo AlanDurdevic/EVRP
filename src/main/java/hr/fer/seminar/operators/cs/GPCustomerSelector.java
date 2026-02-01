@@ -65,6 +65,7 @@ public class GPCustomerSelector implements CustomerSelector{
 				bestCustomer = customer;
 			}
 		}
+		System.out.println(bestPriority);
 		return bestCustomer;
 	}
 
