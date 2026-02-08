@@ -21,6 +21,7 @@ import hr.fer.seminar.entities.Location;
 import hr.fer.seminar.entities.StohasticEVRPProblem;
 import hr.fer.seminar.solution.gp.GeneticProgrammingStohasticEVRP;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPMultiple;
+import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPParallelBVehicle;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPParallelVehicle;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSemiParallelVehicle;
 import hr.fer.seminar.solution.gp.impl.GeneticProgrammingStohasticEVRPSerialVehicle;
@@ -39,7 +40,7 @@ public class StohasticPipeline {
 
 	private static final int numberOfExperiments = 10;
 
-	private static final String resultsFile = "./tardiness-parallel";
+	private static final String resultsFile = "./tardiness-parallel-b";
 
 	private static final String trainFolder = "./data/stohastic/train";
 
@@ -103,7 +104,7 @@ public class StohasticPipeline {
 						currentRepIdx = 0;
 						currentFilename = filename;
 					}
-					trainProblems.add(new GeneticProgrammingStohasticEVRPParallelVehicle(generateProblemTrain(filename, currentRepIdx)));
+					trainProblems.add(new GeneticProgrammingStohasticEVRPParallelBVehicle(generateProblemTrain(filename, currentRepIdx)));
 				}
 				
 				GeneticProgrammingStohasticEVRPMultiple gp = new GeneticProgrammingStohasticEVRPMultiple(trainProblems);
@@ -224,7 +225,7 @@ public class StohasticPipeline {
 				currentRepIdx = 0;
 				currentFilename = filename;
 			}
-			testProblems.add(new GeneticProgrammingStohasticEVRPParallelVehicle(
+			testProblems.add(new GeneticProgrammingStohasticEVRPParallelBVehicle(
 					generateProblemTest(filename, demandDistribution, serviceDistribution, velocityDistribution, currentRepIdx)));
 		}
 
