@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: evrp-backend
+  devtools:
+    livereload:
+      enabled: true
+    restart:
+      enabled: true
+  web:
+    resources:
+      add-mappings: false
+
+server:
+  port: 8080
