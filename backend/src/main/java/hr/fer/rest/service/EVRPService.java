@@ -51,6 +51,7 @@ public class EVRPService {
                 request.getProblemProperties().getAverageVelocity(),
                 evrpCustomers,
                 evrpChargingStations,
+                // TODO: how to define this?
                 new UniformDistribution(2),
                 new UniformDistribution(2),
                 new UniformDistribution(2));
