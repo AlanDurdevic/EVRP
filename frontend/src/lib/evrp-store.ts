@@ -23,7 +23,7 @@ interface EVRPStore {
 }
 
 const initialProblem: EVRPProblem = {
-  depot: { x: 5.0, y: 5.0 },
+  depot: { x: 5.0, y: 5.0, id: "depot" },
   problemProperties: {
     vehicleFuelTankCapacity: 50.0,
     vehicleLoadCapacity: 10.0,

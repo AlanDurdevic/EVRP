@@ -1,4 +1,5 @@
 export interface Depot {
+  id: string,
   x: number
   y: number
 }

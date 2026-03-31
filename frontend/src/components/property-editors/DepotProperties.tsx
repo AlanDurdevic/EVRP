@@ -13,6 +13,14 @@ export function DepotProperties() {
         <span className="font-medium">Depot</span>
       </div>
       <div className="space-y-3">
+        <FieldRow label="ID">
+          <Input
+            type="text"
+            value={problem.depot.id}
+            onChange={(e) => setDepot({ ...problem.depot, id: e.target.value })}
+            className="h-8 text-sm"
+          />
+        </FieldRow>
         <FieldRow label="X Coordinate">
           <Input
             type="number"
