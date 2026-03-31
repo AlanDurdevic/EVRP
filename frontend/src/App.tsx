@@ -1,9 +1,9 @@
+import HomePage from "./pages/HomePage"
+
 function App() {
-    return (
-        <>
-            <p className="text-red-50">hello world</p>
-        </>
-    )
+  return (
+    <HomePage />
+  )
 }
 
 export default App
