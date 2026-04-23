@@ -1,11 +1,12 @@
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import { LocateFixed } from "lucide-react";
+import { LocateFixed, Maximize2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import { useEVRPStore } from "@/lib/evrp-store";
 import type { PlacementMode } from "@/lib/evrp-types";
 import { ELEMENT_COLORS } from "@/lib/element-colors";
+import { MapControlButton } from "./MapControlButton";
 
 // Fix default marker icon paths broken by bundlers
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
@@ -30,9 +31,9 @@ function coloredIcon(color: string) {
 }
 
 const icons = {
-  depot:    coloredIcon(ELEMENT_COLORS.depot.leaflet),
+  depot: coloredIcon(ELEMENT_COLORS.depot.leaflet),
   customer: coloredIcon(ELEMENT_COLORS.customer.leaflet),
-  station:  coloredIcon(ELEMENT_COLORS.station.leaflet),
+  station: coloredIcon(ELEMENT_COLORS.station.leaflet),
 };
 
 interface MapPinProps {
@@ -198,25 +199,32 @@ function StationMarkers() {
 function RecenterButton() {
   const map = useMap();
   return (
-    <div className="leaflet-top leaflet-right">
-      <div className="leaflet-control leaflet-bar">
-        <button
-          onClick={() => map.setView(ZAGREB, DEFAULT_ZOOM)}
-          title="Center on Zagreb"
-          style={{
-            width: 30,
-            height: 30,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "white",
-            cursor: "pointer",
-          }}
-        >
-          <LocateFixed size={16} />
-        </button>
-      </div>
-    </div>
+    <MapControlButton onClick={() => map.setView(ZAGREB, DEFAULT_ZOOM)} title="Center on Zagreb">
+      <LocateFixed size={16} />
+    </MapControlButton>
+  );
+}
+
+function ZoomToFitButton() {
+  const map = useMap();
+  const problem = useEVRPStore((s) => s.problem);
+
+  function handleZoomToFit() {
+    const points: [number, number][] = [];
+    const depot = problem.depot;
+    if (Math.abs(depot.x) >= 10 || Math.abs(depot.y) >= 10)
+      points.push([depot.y, depot.x]);
+    for (const c of problem.customers) points.push([c.y, c.x]);
+    for (const s of problem.chargingStations) points.push([s.y, s.x]);
+    if (points.length === 0) return;
+    if (points.length === 1) { map.setView(points[0], 14); return; }
+    map.fitBounds(L.latLngBounds(points), { padding: [40, 40] });
+  }
+
+  return (
+    <MapControlButton onClick={handleZoomToFit} title="Zoom to fit all elements" style={{ marginTop: 40 }}>
+      <Maximize2 size={16} />
+    </MapControlButton>
   );
 }
 
@@ -238,6 +246,7 @@ export default function MapView() {
       <CustomerMarkers />
       <StationMarkers />
       <RecenterButton />
+      <ZoomToFitButton />
     </MapContainer>
   );
 }
