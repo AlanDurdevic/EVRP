@@ -1,14 +1,23 @@
 import { create } from 'zustand'
 import type { EVRPProblem, Selection, PlacementMode, Customer, ChargingStation, Depot } from './evrp-types'
 
+export type SidebarTab = 'elements' | 'settings' | 'vehicles'
+
 interface EVRPStore {
   problem: EVRPProblem
   selection: Selection
   placementMode: PlacementMode
+  activeTab: SidebarTab
+  hoveredId: string | null
   mapBounds: { minX: number; maxX: number; minY: number; maxY: number }
+  customerCounter: number
+  stationCounter: number
 
   // Actions
+  nextCustomerId: () => string
+  nextStationId: () => string
   setDepot: (depot: Depot) => void
+  setActiveTab: (tab: SidebarTab) => void
   addCustomer: (customer: Customer) => void
   updateCustomer: (id: string, updates: Partial<Customer>) => void
   removeCustomer: (id: string) => void
@@ -18,12 +27,13 @@ interface EVRPStore {
   updateProblemProperties: (props: Partial<EVRPProblem['problemProperties']>) => void
   setSelection: (selection: Selection) => void
   setPlacementMode: (mode: PlacementMode) => void
+  setHoveredId: (id: string | null) => void
   clearSelection: () => void
   exportProblem: () => EVRPProblem
 }
 
 const initialProblem: EVRPProblem = {
-  depot: { x: 5.0, y: 5.0, id: "depot" },
+  depot: { x: 0, y: 0, id: "depot" },
   problemProperties: {
     vehicleFuelTankCapacity: 50.0,
     vehicleLoadCapacity: 10.0,
@@ -39,7 +49,25 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   problem: initialProblem,
   selection: { type: null, id: null },
   placementMode: 'select',
+  activeTab: 'elements',
+  hoveredId: null as string | null,
   mapBounds: { minX: 0, maxX: 10, minY: 0, maxY: 10 },
+  customerCounter: 0,
+  stationCounter: 0,
+
+  nextCustomerId: () => {
+    const n = get().customerCounter + 1
+    set({ customerCounter: n })
+    return `customer-${n}`
+  },
+  nextStationId: () => {
+    const n = get().stationCounter + 1
+    set({ stationCounter: n })
+    return `station-${n}`
+  },
+
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  setHoveredId: (id) => set({ hoveredId: id }),
 
   setDepot: (depot) =>
     set((state) => ({

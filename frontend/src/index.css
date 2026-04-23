@@ -6,6 +6,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    --color-depot: var(--color-green-500);
+    --color-customer: var(--color-orange-500);
+    --color-station: var(--color-blue-500);
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
     --color-sidebar-ring: var(--sidebar-ring);

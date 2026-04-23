@@ -1,6 +1,6 @@
 import { useEVRPStore } from '@/lib/evrp-store'
 import { cn } from '@/lib/utils'
-import { Download, MapPin, MousePointer, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
+import { Download, Eraser, MapPin, MousePointer, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
@@ -87,14 +87,19 @@ export default function Toolbar() {
           </ToolbarButton>
 
           <ToolbarButton
-
             active={placementMode === "station"}
             onClick={() => setPlacementMode('station')}
-
             tooltip='Add Charging Station'
           >
-
             <Zap className="size-4" />
+          </ToolbarButton>
+
+          <ToolbarButton
+            active={placementMode === "erase"}
+            onClick={() => setPlacementMode('erase')}
+            tooltip='Erase'
+          >
+            <Eraser className="size-4" />
           </ToolbarButton>
         </div>
 
@@ -125,16 +130,16 @@ export default function Toolbar() {
 
         <div className="flex items-center gap-4 text-xs text-muted-foreground ml-auto">
           <div className="flex items-center gap-2">
-            <div className="size-3 rounded-sm bg-green-500" />
+            <div className="size-3 rounded-sm bg-depot" />
             <span>Depot</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="size-3 rounded-full bg-orange-500" />
-            <span>Customers: 0</span>
+            <div className="size-3 rounded-full bg-customer" />
+            <span>Customers: {problem.customers.length}</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="size-3 rounded-full bg-blue-500" />
-            <span>Stations: 0</span>
+            <div className="size-3 rounded-full bg-station" />
+            <span>Stations: {problem.chargingStations.length}</span>
           </div>
         </div>
       </header>

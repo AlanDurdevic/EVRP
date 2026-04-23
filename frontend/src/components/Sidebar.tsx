@@ -9,8 +9,10 @@ import { VehicleProperties } from "./VehicleProperties"
 import { ElementsList } from "./ElementsList"
 
 export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const activeTab = useEVRPStore((s) => s.activeTab)
+  const setActiveTab = useEVRPStore((s) => s.setActiveTab)
   return (
-    <Tabs defaultValue="elements">
+    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'elements' | 'settings' | 'vehicles')}>
       <Sidebar
         className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
         {...props}

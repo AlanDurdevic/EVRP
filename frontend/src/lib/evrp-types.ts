@@ -37,7 +37,7 @@ export interface EVRPProblem {
 }
 
 export type SelectionType = 'depot' | 'customer' | 'station' | null
-export type PlacementMode = 'select' | 'depot' | 'customer' | 'station'
+export type PlacementMode = 'select' | 'depot' | 'customer' | 'station' | 'erase'
 
 export interface Selection {
   type: SelectionType
