@@ -7,6 +7,7 @@ import { useEVRPStore } from "@/lib/evrp-store";
 import type { PlacementMode } from "@/lib/evrp-types";
 import { ELEMENT_COLORS } from "@/lib/element-colors";
 import { MapControlButton } from "./MapControlButton";
+import RouteLines from "./RouteLines";
 
 // Fix default marker icon paths broken by bundlers
 delete (L.Icon.Default.prototype as unknown as Record<string, unknown>)._getIconUrl;
@@ -162,12 +163,14 @@ function DepotMarker() {
 }
 
 function CustomerMarkers() {
+  const visible = useEVRPStore((s) => s.customersVisible);
   const customers = useEVRPStore((s) => s.problem.customers);
   const setSelection = useEVRPStore((s) => s.setSelection);
   const setActiveTab = useEVRPStore((s) => s.setActiveTab);
   const updateCustomer = useEVRPStore((s) => s.updateCustomer);
   const removeCustomer = useEVRPStore((s) => s.removeCustomer);
   const hoveredId = useEVRPStore((s) => s.hoveredId);
+  if (!visible) return null;
   return (
     <>
       {customers.map((c) => (
@@ -186,12 +189,14 @@ function CustomerMarkers() {
 }
 
 function StationMarkers() {
+  const visible = useEVRPStore((s) => s.stationsVisible);
   const stations = useEVRPStore((s) => s.problem.chargingStations);
   const setSelection = useEVRPStore((s) => s.setSelection);
   const setActiveTab = useEVRPStore((s) => s.setActiveTab);
   const updateStation = useEVRPStore((s) => s.updateStation);
   const removeStation = useEVRPStore((s) => s.removeStation);
   const hoveredId = useEVRPStore((s) => s.hoveredId);
+  if (!visible) return null;
   return (
     <>
       {stations.map((s) => (
@@ -255,6 +260,7 @@ export default function MapView() {
       />
       <KeyboardShortcuts />
       <MapClickHandler />
+      <RouteLines />
       <DepotMarker />
       <CustomerMarkers />
       <StationMarkers />

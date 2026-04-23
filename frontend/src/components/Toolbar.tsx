@@ -1,7 +1,7 @@
 import { useEVRPStore } from '@/lib/evrp-store'
 import { calculateRoute } from '@/lib/routing-service'
 import { cn } from '@/lib/utils'
-import { Download, Eraser, MapPin, MousePointer, Route, RotateCcw, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
+import { Download, Eraser, Loader2, MapPin, MousePointer, Route, RotateCcw, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { Button } from './ui/button'
@@ -11,8 +11,9 @@ import { useSidebar } from './ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
 export default function Toolbar() {
-  const { placementMode, setPlacementMode, problem, exportProblem, importProblem, resetProblem } = useEVRPStore()
+  const { placementMode, setPlacementMode, problem, exportProblem, importProblem, resetProblem, setRoutingResult } = useEVRPStore()
   const [confirmReset, setConfirmReset] = useState(false)
+  const [isCalculating, setIsCalculating] = useState(false)
   const { toggleSidebar, open } = useSidebar();
 
   const handleExport = () => {
@@ -26,8 +27,14 @@ export default function Toolbar() {
     URL.revokeObjectURL(url)
   }
 
-  const handleCalculate = () => {
-    calculateRoute(problem)
+  const handleCalculate = async () => {
+    setIsCalculating(true)
+    try {
+      const result = await calculateRoute(problem)
+      setRoutingResult(result)
+    } finally {
+      setIsCalculating(false)
+    }
   }
 
   const handleImport = () => {
@@ -136,8 +143,8 @@ export default function Toolbar() {
           <Separator orientation="vertical" className="h-6" />
         </div>
 
-        <ToolbarButton tooltip="Calculate best route" onClick={handleCalculate}>
-          <Route className="size-4" />
+        <ToolbarButton tooltip="Calculate best route" onClick={handleCalculate} disabled={isCalculating}>
+          {isCalculating ? <Loader2 className="size-4 animate-spin" /> : <Route className="size-4" />}
         </ToolbarButton>
 
         <ToolbarButton tooltip="Reset problem" onClick={() => setConfirmReset(true)}>
@@ -182,6 +189,7 @@ type ToolbarButtonProps = {
   onClick: () => void,
   activeClassName?: string,
   active?: boolean,
+  disabled?: boolean,
   className?: string
 }
 
@@ -190,12 +198,13 @@ const ToolbarButton = ({
   tooltip,
   onClick,
   active,
+  disabled,
   className,
   activeClassName,
 }: ToolbarButtonProps) => (
   <Tooltip>
     <TooltipTrigger asChild>
-      <Button variant={active ? "default" : "ghost"} size="icon-sm" onClick={onClick} className={
+      <Button variant={active ? "default" : "ghost"} size="icon-sm" onClick={onClick} disabled={disabled} className={
         cn("p-4", active && (activeClassName ? activeClassName : "bg-green-500"), className)
       }>
         {children}

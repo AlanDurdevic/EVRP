@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { EVRPProblem, Selection, PlacementMode, Customer, ChargingStation, Depot } from './evrp-types'
+import type { RoutingResult } from './routing-service'
 
 export type SidebarTab = 'elements' | 'settings' | 'vehicles'
 
@@ -12,10 +13,17 @@ interface EVRPStore {
   mapBounds: { minX: number; maxX: number; minY: number; maxY: number }
   customerCounter: number
   stationCounter: number
+  routingResult: RoutingResult | null
+  customersVisible: boolean
+  stationsVisible: boolean
+  routeVisibility: Record<number, boolean>
 
   // Actions
   nextCustomerId: () => string
   nextStationId: () => string
+  toggleCustomersVisible: () => void
+  toggleStationsVisible: () => void
+  toggleRouteVisible: (index: number) => void
   setDepot: (depot: Depot) => void
   setActiveTab: (tab: SidebarTab) => void
   addCustomer: (customer: Customer) => void
@@ -35,6 +43,7 @@ interface EVRPStore {
   exportProblem: () => EVRPProblem
   importProblem: (problem: EVRPProblem) => void
   resetProblem: () => void
+  setRoutingResult: (result: RoutingResult | null) => void
 }
 
 const initialProblem: EVRPProblem = {
@@ -58,7 +67,17 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   hoveredId: null as string | null,
   mapBounds: { minX: 0, maxX: 10, minY: 0, maxY: 10 },
   customerCounter: 0,
+  routingResult: null,
   stationCounter: 0,
+  customersVisible: true,
+  stationsVisible: true,
+  routeVisibility: {},
+
+  toggleCustomersVisible: () => set((s) => ({ customersVisible: !s.customersVisible })),
+  toggleStationsVisible: () => set((s) => ({ stationsVisible: !s.stationsVisible })),
+  toggleRouteVisible: (index) => set((s) => ({
+    routeVisibility: { ...s.routeVisibility, [index]: !(s.routeVisibility[index] ?? true) },
+  })),
 
   nextCustomerId: () => {
     const n = get().customerCounter + 1
@@ -174,6 +193,8 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
       placementMode: 'select',
       customerCounter: problem.customers.length,
       stationCounter: problem.chargingStations.length,
+      routingResult: null,
+      routeVisibility: {},
     }),
 
   resetProblem: () =>
@@ -183,6 +204,10 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
       placementMode: 'select',
       customerCounter: 0,
       stationCounter: 0,
+      routingResult: null,
+      routeVisibility: {},
     }),
+
+  setRoutingResult: (result) => set({ routingResult: result, routeVisibility: {} }),
 }))
 
