@@ -68,6 +68,7 @@ export default function Toolbar() {
           </ToolbarButton>
 
           <ToolbarButton
+            activeClassName='bg-depot'
             active={placementMode === "depot"}
             onClick={() => setPlacementMode('depot')}
             tooltip='Place Depot'
@@ -77,7 +78,7 @@ export default function Toolbar() {
 
 
           <ToolbarButton
-
+            activeClassName='bg-customer'
             active={placementMode === "customer"}
             onClick={() => setPlacementMode('customer')}
             tooltip='Add Customer'
@@ -87,6 +88,7 @@ export default function Toolbar() {
           </ToolbarButton>
 
           <ToolbarButton
+            activeClassName='bg-station'
             active={placementMode === "station"}
             onClick={() => setPlacementMode('station')}
             tooltip='Add Charging Station'
@@ -95,6 +97,7 @@ export default function Toolbar() {
           </ToolbarButton>
 
           <ToolbarButton
+            activeClassName='bg-red-500'
             active={placementMode === "erase"}
             onClick={() => setPlacementMode('erase')}
             tooltip='Erase'
@@ -152,6 +155,7 @@ type ToolbarButtonProps = {
   children: ReactNode,
   tooltip: string,
   onClick: () => void,
+  activeClassName?: string,
   active?: boolean,
   className?: string
 }
@@ -162,11 +166,12 @@ const ToolbarButton = ({
   onClick,
   active,
   className,
+  activeClassName,
 }: ToolbarButtonProps) => (
   <Tooltip>
     <TooltipTrigger asChild>
       <Button variant={active ? "default" : "ghost"} size="icon-sm" onClick={onClick} className={
-        cn("p-4", active && "bg-green-600", className)
+        cn("p-4", active && (activeClassName ? activeClassName : "bg-green-500"), className)
       }>
         {children}
       </Button>

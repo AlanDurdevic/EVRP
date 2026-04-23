@@ -21,9 +21,12 @@ interface EVRPStore {
   addCustomer: (customer: Customer) => void
   updateCustomer: (id: string, updates: Partial<Customer>) => void
   removeCustomer: (id: string) => void
+  clearCustomers: () => void
   addStation: (station: ChargingStation) => void
   updateStation: (id: string, updates: Partial<ChargingStation>) => void
   removeStation: (id: string) => void
+  clearStations: () => void
+  removeDepot: () => void
   updateProblemProperties: (props: Partial<EVRPProblem['problemProperties']>) => void
   setSelection: (selection: Selection) => void
   setPlacementMode: (mode: PlacementMode) => void
@@ -99,6 +102,24 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
         customers: state.problem.customers.filter((c) => c.id !== id),
       },
       selection: state.selection.id === id ? { type: null, id: null } : state.selection,
+    })),
+
+  clearCustomers: () =>
+    set((state) => ({
+      problem: { ...state.problem, customers: [] },
+      selection: state.selection.type === 'customer' ? { type: null, id: null } : state.selection,
+    })),
+
+  clearStations: () =>
+    set((state) => ({
+      problem: { ...state.problem, chargingStations: [] },
+      selection: state.selection.type === 'station' ? { type: null, id: null } : state.selection,
+    })),
+
+  removeDepot: () =>
+    set((state) => ({
+      problem: { ...state.problem, depot: { id: 'depot', x: 0, y: 0 } },
+      selection: state.selection.type === 'depot' ? { type: null, id: null } : state.selection,
     })),
 
   addStation: (station) =>

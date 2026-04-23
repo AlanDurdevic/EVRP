@@ -1,10 +1,15 @@
 import { useEVRPStore } from "@/lib/evrp-store"
 import { Button } from "./ui/button"
+import { ConfirmDialog } from "./ConfirmDialog"
 import { cn } from "@/lib/utils"
-import { MapPin, Users, Zap } from "lucide-react"
+import { MapPin, Trash2, Users, Zap } from "lucide-react"
+import { useState } from "react"
 
 export const ElementsList = () => {
-  const { problem, selection, setSelection, setActiveTab, setHoveredId, setPlacementMode } = useEVRPStore()
+  const { problem, selection, setSelection, setActiveTab, setHoveredId, setPlacementMode, clearCustomers, clearStations, removeDepot } = useEVRPStore()
+  const [confirmClearCustomers, setConfirmClearCustomers] = useState(false)
+  const [confirmClearStations, setConfirmClearStations] = useState(false)
+  const [confirmRemoveDepot, setConfirmRemoveDepot] = useState(false)
 
   function select(type: 'depot' | 'customer' | 'station', id: string | null) {
     setSelection({ type, id })
@@ -17,8 +22,19 @@ export const ElementsList = () => {
     <div className="space-y-4 h-full">
       {/* Depot */}
       <div className="space-y-2">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Depot
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Depot
+          </div>
+          {depotPlaced && (
+            <button
+              onClick={() => setConfirmRemoveDepot(true)}
+              className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+              title="Remove depot"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          )}
         </div>
         {depotPlaced ? (
           <Button
@@ -49,8 +65,19 @@ export const ElementsList = () => {
 
       {/* Customers */}
       <div className="space-y-2">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Customers ({problem.customers.length})
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Customers ({problem.customers.length})
+          </div>
+          {problem.customers.length > 0 && (
+            <button
+              onClick={() => setConfirmClearCustomers(true)}
+              className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+              title="Clear all customers"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          )}
         </div>
         {problem.customers.length === 0 ? (
           <button
@@ -84,8 +111,19 @@ export const ElementsList = () => {
 
       {/* Charging Stations */}
       <div className="space-y-2">
-        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-          Charging Stations ({problem.chargingStations.length})
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Charging Stations ({problem.chargingStations.length})
+          </div>
+          {problem.chargingStations.length > 0 && (
+            <button
+              onClick={() => setConfirmClearStations(true)}
+              className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
+              title="Clear all stations"
+            >
+              <Trash2 className="size-3.5" />
+            </button>
+          )}
         </div>
         {problem.chargingStations.length === 0 ? (
           <button
@@ -116,6 +154,28 @@ export const ElementsList = () => {
           ))
         )}
       </div>
+
+      <ConfirmDialog
+        open={confirmRemoveDepot}
+        onOpenChange={setConfirmRemoveDepot}
+        title="Remove depot"
+        description="This will remove the depot from the map. This cannot be undone."
+        onConfirm={removeDepot}
+      />
+      <ConfirmDialog
+        open={confirmClearCustomers}
+        onOpenChange={setConfirmClearCustomers}
+        title="Clear all customers"
+        description={`This will permanently remove all ${problem.customers.length} customer${problem.customers.length !== 1 ? 's' : ''}. This cannot be undone.`}
+        onConfirm={clearCustomers}
+      />
+      <ConfirmDialog
+        open={confirmClearStations}
+        onOpenChange={setConfirmClearStations}
+        title="Clear all charging stations"
+        description={`This will permanently remove all ${problem.chargingStations.length} charging station${problem.chargingStations.length !== 1 ? 's' : ''}. This cannot be undone.`}
+        onConfirm={clearStations}
+      />
     </div>
   )
 }
