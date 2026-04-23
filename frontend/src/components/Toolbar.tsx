@@ -1,6 +1,7 @@
 import { useEVRPStore } from '@/lib/evrp-store'
+import { calculateRoute } from '@/lib/routing-service'
 import { cn } from '@/lib/utils'
-import { Download, Eraser, MapPin, MousePointer, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
+import { Download, Eraser, MapPin, MousePointer, Route, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
@@ -20,6 +21,10 @@ export default function Toolbar() {
     // a.download = 'evrp-problem.json'
     // a.click()
     // URL.revokeObjectURL(url)
+  }
+
+  const handleCalculate = () => {
+    calculateRoute(problem)
   }
 
   const handleImport = () => {
@@ -119,13 +124,21 @@ export default function Toolbar() {
           </ToolbarButton>
 
           <ToolbarButton
-            tooltip='Import problem'
+            tooltip='Export problem'
             onClick={handleExport}
           >
             <Download className="size-4" />
           </ToolbarButton>
 
         </div>
+
+        <div className="flex items-center mx-2">
+          <Separator orientation="vertical" className="h-6" />
+        </div>
+
+        <ToolbarButton tooltip="Calculate best route" onClick={handleCalculate}>
+          <Route className="size-4" />
+        </ToolbarButton>
 
         <div className="flex items-center mx-2">
           <Separator orientation="vertical" className="h-6" />
