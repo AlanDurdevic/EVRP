@@ -34,6 +34,7 @@ interface EVRPStore {
   clearSelection: () => void
   exportProblem: () => EVRPProblem
   importProblem: (problem: EVRPProblem) => void
+  resetProblem: () => void
 }
 
 const initialProblem: EVRPProblem = {
@@ -173,6 +174,15 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
       placementMode: 'select',
       customerCounter: problem.customers.length,
       stationCounter: problem.chargingStations.length,
+    }),
+
+  resetProblem: () =>
+    set({
+      problem: initialProblem,
+      selection: { type: null, id: null },
+      placementMode: 'select',
+      customerCounter: 0,
+      stationCounter: 0,
     }),
 }))
 

@@ -1,15 +1,18 @@
 import { useEVRPStore } from '@/lib/evrp-store'
 import { calculateRoute } from '@/lib/routing-service'
 import { cn } from '@/lib/utils'
-import { Download, Eraser, MapPin, MousePointer, Route, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
+import { Download, Eraser, MapPin, MousePointer, Route, RotateCcw, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
 import type { ReactNode } from 'react'
+import { useState } from 'react'
 import { Button } from './ui/button'
+import { ConfirmDialog } from './ConfirmDialog'
 import { Separator } from './ui/separator'
 import { useSidebar } from './ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
 export default function Toolbar() {
-  const { placementMode, setPlacementMode, problem, exportProblem, importProblem } = useEVRPStore()
+  const { placementMode, setPlacementMode, problem, exportProblem, importProblem, resetProblem } = useEVRPStore()
+  const [confirmReset, setConfirmReset] = useState(false)
   const { toggleSidebar, open } = useSidebar();
 
   const handleExport = () => {
@@ -137,6 +140,10 @@ export default function Toolbar() {
           <Route className="size-4" />
         </ToolbarButton>
 
+        <ToolbarButton tooltip="Reset problem" onClick={() => setConfirmReset(true)}>
+          <RotateCcw className="size-4" />
+        </ToolbarButton>
+
         <div className="flex items-center mx-2">
           <Separator orientation="vertical" className="h-6" />
         </div>
@@ -156,6 +163,14 @@ export default function Toolbar() {
           </div>
         </div>
       </header>
+
+      <ConfirmDialog
+        open={confirmReset}
+        onOpenChange={setConfirmReset}
+        title="Reset problem"
+        description="This will remove all elements and reset all settings. This cannot be undone."
+        onConfirm={resetProblem}
+      />
     </TooltipProvider>
   )
 }
