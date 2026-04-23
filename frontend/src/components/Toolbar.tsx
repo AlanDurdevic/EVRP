@@ -9,18 +9,18 @@ import { useSidebar } from './ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
 export default function Toolbar() {
-  const { placementMode, setPlacementMode, problem, exportProblem } = useEVRPStore()
+  const { placementMode, setPlacementMode, problem, exportProblem, importProblem } = useEVRPStore()
   const { toggleSidebar, open } = useSidebar();
 
   const handleExport = () => {
-    // const data = exportProblem()
-    // const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
-    // const url = URL.createObjectURL(blob)
-    // const a = document.createElement('a')
-    // a.href = url
-    // a.download = 'evrp-problem.json'
-    // a.click()
-    // URL.revokeObjectURL(url)
+    const data = exportProblem()
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'evrp-problem.json'
+    a.click()
+    URL.revokeObjectURL(url)
   }
 
   const handleCalculate = () => {
@@ -28,23 +28,20 @@ export default function Toolbar() {
   }
 
   const handleImport = () => {
-    // const input = document.createElement('input')
-    // input.type = 'file'
-    // input.accept = '.json'
-    // input.onchange = async (e) => {
-    //   const file = (e.target as HTMLInputElement).files?.[0]
-    //   if (!file) return
-    //
-    //   try {
-    //     const text = await file.text()
-    //     const data = JSON.parse(text)
-    //     // TODO: Validate and load data
-    //     console.log('Imported:', data)
-    //   } catch {
-    //     console.error('Failed to parse file')
-    //   }
-    // }
-    // input.click()
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      try {
+        const text = await file.text()
+        importProblem(JSON.parse(text))
+      } catch {
+        console.error('Failed to import problem: invalid JSON')
+      }
+    }
+    input.click()
   }
 
   return (

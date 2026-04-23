@@ -33,6 +33,7 @@ interface EVRPStore {
   setHoveredId: (id: string | null) => void
   clearSelection: () => void
   exportProblem: () => EVRPProblem
+  importProblem: (problem: EVRPProblem) => void
 }
 
 const initialProblem: EVRPProblem = {
@@ -164,5 +165,14 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   clearSelection: () => set({ selection: { type: null, id: null } }),
 
   exportProblem: () => get().problem,
+
+  importProblem: (problem) =>
+    set({
+      problem,
+      selection: { type: null, id: null },
+      placementMode: 'select',
+      customerCounter: problem.customers.length,
+      stationCounter: problem.chargingStations.length,
+    }),
 }))
 
