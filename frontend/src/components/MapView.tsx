@@ -81,19 +81,32 @@ const KEY_MODES: Record<string, PlacementMode> = { v: "select", d: "depot", c: "
 
 function KeyboardShortcuts() {
   const setPlacementMode = useEVRPStore((s) => s.setPlacementMode);
+  const clearSelection = useEVRPStore((s) => s.clearSelection);
+  const removeCustomer = useEVRPStore((s) => s.removeCustomer);
+  const removeStation = useEVRPStore((s) => s.removeStation);
+  const removeDepot = useEVRPStore((s) => s.removeDepot);
 
   useEffect(() => {
     function onKeyDown(ev: KeyboardEvent) {
       if (ev.target instanceof HTMLInputElement || ev.target instanceof HTMLTextAreaElement) return;
 
       const mode = KEY_MODES[ev.key];
+      if (mode) { setPlacementMode(mode); return; }
 
-      if (mode) setPlacementMode(mode);
+      if (ev.key === "Delete" || ev.key === "Backspace") {
+        const { selection } = useEVRPStore.getState();
+        if (selection.type === "customer" && selection.id) removeCustomer(selection.id);
+        else if (selection.type === "station" && selection.id) removeStation(selection.id);
+        else if (selection.type === "depot") removeDepot();
+        else return;
+        clearSelection();
+        setPlacementMode("select");
+      }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [setPlacementMode]);
+  }, [setPlacementMode, clearSelection, removeCustomer, removeStation, removeDepot]);
 
   return null;
 }
