@@ -1,4 +1,5 @@
 import type { Customer, ChargingStation, EVRPProblem } from './evrp-types'
+import type { OptimizationTarget, VehicleMethod } from './evrp-store'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -40,8 +41,13 @@ function normalizeProblem(problem: EVRPProblem): NormalizedProblem {
   }
 }
 
-async function callRoutingApi(payload: NormalizedProblem): Promise<RoutingResult> {
-  const response = await fetch(`${API_BASE_URL}/api/evrp/solve`, {
+async function callRoutingApi(
+  payload: NormalizedProblem,
+  optimizationTarget: OptimizationTarget,
+  vehicleMethod: VehicleMethod,
+): Promise<RoutingResult> {
+  const params = new URLSearchParams({ optimizationTarget, vehicleMethod })
+  const response = await fetch(`${API_BASE_URL}/api/evrp/solve?${params}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -54,9 +60,13 @@ async function callRoutingApi(payload: NormalizedProblem): Promise<RoutingResult
   return response.json()
 }
 
-export async function calculateRoute(problem: EVRPProblem): Promise<RoutingResult> {
+export async function calculateRoute(
+  problem: EVRPProblem,
+  optimizationTarget: OptimizationTarget,
+  vehicleMethod: VehicleMethod,
+): Promise<RoutingResult> {
   const normalized = normalizeProblem(problem)
-  const result = await callRoutingApi(normalized)
+  const result = await callRoutingApi(normalized, optimizationTarget, vehicleMethod)
   console.log('Routing result:', result)
   return result
 }

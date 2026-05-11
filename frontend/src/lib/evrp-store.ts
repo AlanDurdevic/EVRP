@@ -3,6 +3,10 @@ import type { EVRPProblem, Selection, PlacementMode, Customer, ChargingStation, 
 import type { RoutingResult } from './routing-service'
 
 export type SidebarTab = 'elements' | 'settings' | 'vehicles'
+export type OptimizationTarget = 'energy' | 'tardiness' | 'vehicle'
+export type VehicleMethod = 'parallel' | 'parallelB' | 'semiparallel' | 'semiparallelB' | 'serial' |
+  'parallel-iterations' | 'parallelB-iterations' | 'semiparallel-iterations' |
+  'semiparallelB-iterations' | 'serial-iterations'
 
 interface EVRPStore {
   problem: EVRPProblem
@@ -17,8 +21,12 @@ interface EVRPStore {
   customersVisible: boolean
   stationsVisible: boolean
   routeVisibility: Record<number, boolean>
+  optimizationTarget: OptimizationTarget
+  vehicleMethod: VehicleMethod
 
   // Actions
+  setOptimizationTarget: (target: OptimizationTarget) => void
+  setVehicleMethod: (method: VehicleMethod) => void
   nextCustomerId: () => string
   nextStationId: () => string
   toggleCustomersVisible: () => void
@@ -72,6 +80,11 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   customersVisible: true,
   stationsVisible: true,
   routeVisibility: {},
+  optimizationTarget: 'energy' as OptimizationTarget,
+  vehicleMethod: 'parallel' as VehicleMethod,
+
+  setOptimizationTarget: (target) => set({ optimizationTarget: target }),
+  setVehicleMethod: (method) => set({ vehicleMethod: method }),
 
   toggleCustomersVisible: () => set((s) => ({ customersVisible: !s.customersVisible })),
   toggleStationsVisible: () => set((s) => ({ stationsVisible: !s.stationsVisible })),
