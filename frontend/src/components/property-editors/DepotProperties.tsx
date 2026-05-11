@@ -1,7 +1,7 @@
-import { useEVRPStore } from "@/lib/evrp-store"
-import { MapPin } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { FieldRow } from "@/components/FieldRow"
+import { useEVRPStore } from '@/lib/evrp-store'
+import { MapPin } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { FieldRow } from '@/components/FieldRow'
 
 export function DepotProperties() {
   const { problem, setDepot } = useEVRPStore()

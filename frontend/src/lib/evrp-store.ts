@@ -1,12 +1,27 @@
 import { create } from 'zustand'
-import type { EVRPProblem, Selection, PlacementMode, Customer, ChargingStation, Depot } from './evrp-types'
+import type {
+  EVRPProblem,
+  Selection,
+  PlacementMode,
+  Customer,
+  ChargingStation,
+  Depot,
+} from './evrp-types'
 import type { RoutingResult } from './routing-service'
 
 export type SidebarTab = 'elements' | 'settings' | 'vehicles'
 export type OptimizationTarget = 'energy' | 'tardiness' | 'vehicle'
-export type VehicleMethod = 'parallel' | 'parallelB' | 'semiparallel' | 'semiparallelB' | 'serial' |
-  'parallel-iterations' | 'parallelB-iterations' | 'semiparallel-iterations' |
-  'semiparallelB-iterations' | 'serial-iterations'
+export type VehicleMethod =
+  | 'parallel'
+  | 'parallelB'
+  | 'semiparallel'
+  | 'semiparallelB'
+  | 'serial'
+  | 'parallel-iterations'
+  | 'parallelB-iterations'
+  | 'semiparallel-iterations'
+  | 'semiparallelB-iterations'
+  | 'serial-iterations'
 
 interface EVRPStore {
   problem: EVRPProblem
@@ -55,7 +70,7 @@ interface EVRPStore {
 }
 
 const initialProblem: EVRPProblem = {
-  depot: { x: 0, y: 0, id: "depot" },
+  depot: { x: 0, y: 0, id: 'depot' },
   problemProperties: {
     vehicleFuelTankCapacity: 50.0,
     vehicleLoadCapacity: 10.0,
@@ -88,9 +103,10 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
 
   toggleCustomersVisible: () => set((s) => ({ customersVisible: !s.customersVisible })),
   toggleStationsVisible: () => set((s) => ({ stationsVisible: !s.stationsVisible })),
-  toggleRouteVisible: (index) => set((s) => ({
-    routeVisibility: { ...s.routeVisibility, [index]: !(s.routeVisibility[index] ?? true) },
-  })),
+  toggleRouteVisible: (index) =>
+    set((s) => ({
+      routeVisibility: { ...s.routeVisibility, [index]: !(s.routeVisibility[index] ?? true) },
+    })),
 
   nextCustomerId: () => {
     const n = get().customerCounter + 1
@@ -123,9 +139,7 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
     set((state) => ({
       problem: {
         ...state.problem,
-        customers: state.problem.customers.map((c) =>
-          c.id === id ? { ...c, ...updates } : c
-        ),
+        customers: state.problem.customers.map((c) => (c.id === id ? { ...c, ...updates } : c)),
       },
     })),
 
@@ -169,7 +183,7 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
       problem: {
         ...state.problem,
         chargingStations: state.problem.chargingStations.map((s) =>
-          s.id === id ? { ...s, ...updates } : s
+          s.id === id ? { ...s, ...updates } : s,
         ),
       },
     })),
@@ -223,4 +237,3 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
 
   setRoutingResult: (result) => set({ routingResult: result, routeVisibility: {} }),
 }))
-

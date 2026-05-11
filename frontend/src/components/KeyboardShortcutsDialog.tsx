@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
+import { useEffect, useState } from 'react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog'
 
 const SHORTCUTS = [
-  { keys: ["V"], description: "Select / Move mode" },
-  { keys: ["D"], description: "Place depot" },
-  { keys: ["C"], description: "Add customer" },
-  { keys: ["S"], description: "Add charging station" },
-  { keys: ["E"], description: "Erase mode" },
-  { keys: ["Shift", "Click"], description: "Remove element" },
-  { keys: ["Del / Backspace"], description: "Remove selected element" },
-  { keys: ["?"], description: "Show this cheat sheet" },
+  { keys: ['V'], description: 'Select / Move mode' },
+  { keys: ['D'], description: 'Place depot' },
+  { keys: ['C'], description: 'Add customer' },
+  { keys: ['S'], description: 'Add charging station' },
+  { keys: ['E'], description: 'Erase mode' },
+  { keys: ['Shift', 'Click'], description: 'Remove element' },
+  { keys: ['Del / Backspace'], description: 'Remove selected element' },
+  { keys: ['?'], description: 'Show this cheat sheet' },
 ]
 
 export function KeyboardShortcutsDialog() {
@@ -18,10 +18,10 @@ export function KeyboardShortcutsDialog() {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
-      if (e.key === "?") setOpen((v) => !v)
+      if (e.key === '?') setOpen((v) => !v)
     }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
 
   return (

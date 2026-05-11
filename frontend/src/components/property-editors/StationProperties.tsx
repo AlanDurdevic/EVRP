@@ -1,9 +1,9 @@
-import { Trash2, Zap } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { FieldRow } from "@/components/FieldRow"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { useEVRPStore } from "@/lib/evrp-store"
+import { Trash2, Zap } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { FieldRow } from '@/components/FieldRow'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import { useEVRPStore } from '@/lib/evrp-store'
 
 export function StationProperties() {
   const { problem, selection, updateStation, removeStation } = useEVRPStore()
@@ -57,7 +57,9 @@ export function StationProperties() {
             step="0.1"
             min="0"
             value={station.dueDate}
-            onChange={(e) => updateStation(station.id, { dueDate: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateStation(station.id, { dueDate: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -65,4 +67,3 @@ export function StationProperties() {
     </div>
   )
 }
-

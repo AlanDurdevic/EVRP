@@ -1,6 +1,13 @@
-import { Trash2 } from "lucide-react"
-import { Button } from "./ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { Trash2 } from 'lucide-react'
+import { Button } from './ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -10,7 +17,13 @@ interface ConfirmDialogProps {
   onConfirm: () => void
 }
 
-export function ConfirmDialog({ open, onOpenChange, title, description, onConfirm }: ConfirmDialogProps) {
+export function ConfirmDialog({
+  open,
+  onOpenChange,
+  title,
+  description,
+  onConfirm,
+}: ConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm">
@@ -22,8 +35,18 @@ export function ConfirmDialog({ open, onOpenChange, title, description, onConfir
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button variant="destructive" onClick={() => { onConfirm(); onOpenChange(false) }}>Delete all</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              onConfirm()
+              onOpenChange(false)
+            }}
+          >
+            Delete all
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

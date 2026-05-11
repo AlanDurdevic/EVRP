@@ -1,5 +1,5 @@
 export interface Depot {
-  id: string,
+  id: string
   x: number
   y: number
 }
@@ -43,4 +43,3 @@ export interface Selection {
   type: SelectionType
   id: string | null
 }
-

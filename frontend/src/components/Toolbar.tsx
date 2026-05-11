@@ -2,13 +2,34 @@ import { useEVRPStore } from '@/lib/evrp-store'
 import type { OptimizationTarget, VehicleMethod } from '@/lib/evrp-store'
 import { calculateRoute } from '@/lib/routing-service'
 import { cn } from '@/lib/utils'
-import { Download, Eraser, Info, Loader2, MapPin, MousePointer, Route, RotateCcw, SidebarIcon, Upload, Users, Zap } from 'lucide-react'
+import {
+  Download,
+  Eraser,
+  Info,
+  Loader2,
+  MapPin,
+  MousePointer,
+  Route,
+  RotateCcw,
+  SidebarIcon,
+  Upload,
+  Users,
+  Zap,
+} from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { Button } from './ui/button'
 import { ConfirmDialog } from './ConfirmDialog'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from './ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select'
 import { Separator } from './ui/separator'
 import { useSidebar } from './ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
@@ -29,12 +50,21 @@ const VEHICLE_METHODS: { value: VehicleMethod; label: string }[] = [
 
 export default function Toolbar() {
   const {
-    placementMode, setPlacementMode, problem, exportProblem, importProblem, resetProblem,
-    setRoutingResult, optimizationTarget, vehicleMethod, setOptimizationTarget, setVehicleMethod,
+    placementMode,
+    setPlacementMode,
+    problem,
+    exportProblem,
+    importProblem,
+    resetProblem,
+    setRoutingResult,
+    optimizationTarget,
+    vehicleMethod,
+    setOptimizationTarget,
+    setVehicleMethod,
   } = useEVRPStore()
   const [confirmReset, setConfirmReset] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
-  const { toggleSidebar, open } = useSidebar();
+  const { toggleSidebar, open } = useSidebar()
 
   const handleExport = () => {
     const data = exportProblem()
@@ -80,8 +110,8 @@ export default function Toolbar() {
         <ToolbarButton
           active={!open}
           onClick={toggleSidebar}
-          tooltip={!open ? "Expand sidebar" : "Collapse sidebar"}
-          className='text-black bg-white'
+          tooltip={!open ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="text-black bg-white"
         >
           <SidebarIcon className="size-4" />
         </ToolbarButton>
@@ -92,47 +122,45 @@ export default function Toolbar() {
 
         <div className="flex items-center gap-1">
           <ToolbarButton
-            active={placementMode === "select"}
+            active={placementMode === 'select'}
             onClick={() => setPlacementMode('select')}
-            tooltip='Select / Move'
+            tooltip="Select / Move"
           >
             <MousePointer className="size-4" />
           </ToolbarButton>
 
           <ToolbarButton
-            activeClassName='bg-depot'
-            active={placementMode === "depot"}
+            activeClassName="bg-depot"
+            active={placementMode === 'depot'}
             onClick={() => setPlacementMode('depot')}
-            tooltip='Place Depot'
+            tooltip="Place Depot"
           >
             <MapPin className="size-4" />
           </ToolbarButton>
 
-
           <ToolbarButton
-            activeClassName='bg-customer'
-            active={placementMode === "customer"}
+            activeClassName="bg-customer"
+            active={placementMode === 'customer'}
             onClick={() => setPlacementMode('customer')}
-            tooltip='Add Customer'
+            tooltip="Add Customer"
           >
-
             <Users className="size-4" />
           </ToolbarButton>
 
           <ToolbarButton
-            activeClassName='bg-station'
-            active={placementMode === "station"}
+            activeClassName="bg-station"
+            active={placementMode === 'station'}
             onClick={() => setPlacementMode('station')}
-            tooltip='Add Charging Station'
+            tooltip="Add Charging Station"
           >
             <Zap className="size-4" />
           </ToolbarButton>
 
           <ToolbarButton
-            activeClassName='bg-red-500'
-            active={placementMode === "erase"}
+            activeClassName="bg-red-500"
+            active={placementMode === 'erase'}
             onClick={() => setPlacementMode('erase')}
-            tooltip='Erase'
+            tooltip="Erase"
           >
             <Eraser className="size-4" />
           </ToolbarButton>
@@ -143,20 +171,13 @@ export default function Toolbar() {
         </div>
 
         <div className="flex items-center gap-1">
-          <ToolbarButton
-            tooltip='Import problem'
-            onClick={handleImport}
-          >
+          <ToolbarButton tooltip="Import problem" onClick={handleImport}>
             <Upload className="size-4" />
           </ToolbarButton>
 
-          <ToolbarButton
-            tooltip='Export problem'
-            onClick={handleExport}
-          >
+          <ToolbarButton tooltip="Export problem" onClick={handleExport}>
             <Download className="size-4" />
           </ToolbarButton>
-
         </div>
 
         <div className="flex items-center mx-2">
@@ -164,8 +185,14 @@ export default function Toolbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <LabeledSelect label="Target" info="The objective the solver minimises: total energy consumed by all vehicles, total tardiness (sum of late arrivals), or total number of vehicles used.">
-            <Select value={optimizationTarget} onValueChange={(v) => setOptimizationTarget(v as OptimizationTarget)}>
+          <LabeledSelect
+            label="Target"
+            info="The objective the solver minimises: total energy consumed by all vehicles, total tardiness (sum of late arrivals), or total number of vehicles used."
+          >
+            <Select
+              value={optimizationTarget}
+              onValueChange={(v) => setOptimizationTarget(v as OptimizationTarget)}
+            >
               <SelectTrigger className="h-8 w-36 text-xs">
                 <SelectValue />
               </SelectTrigger>
@@ -173,15 +200,23 @@ export default function Toolbar() {
                 <SelectContent>
                   <SelectLabel>Target</SelectLabel>
                   {OPTIMIZATION_TARGETS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value} className="text-xs">{label}</SelectItem>
+                    <SelectItem key={value} value={value} className="text-xs">
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </SelectGroup>
             </Select>
           </LabeledSelect>
 
-          <LabeledSelect label="Program type" info="The vehicle-selection heuristic used when building routes. Parallel and serial differ in how vehicles are assigned simultaneously vs. one at a time. The B variants use an alternative scoring function. Iteration variants run multiple passes to refine the solution.">
-            <Select value={vehicleMethod} onValueChange={(v) => setVehicleMethod(v as VehicleMethod)}>
+          <LabeledSelect
+            label="Program type"
+            info="The vehicle-selection heuristic used when building routes. Parallel and serial differ in how vehicles are assigned simultaneously vs. one at a time. The B variants use an alternative scoring function. Iteration variants run multiple passes to refine the solution."
+          >
+            <Select
+              value={vehicleMethod}
+              onValueChange={(v) => setVehicleMethod(v as VehicleMethod)}
+            >
               <SelectTrigger className="h-8 w-44 text-xs">
                 <SelectValue />
               </SelectTrigger>
@@ -189,7 +224,9 @@ export default function Toolbar() {
                 <SelectGroup>
                   <SelectLabel>Program type</SelectLabel>
                   {VEHICLE_METHODS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value} className="text-xs">{label}</SelectItem>
+                    <SelectItem key={value} value={value} className="text-xs">
+                      {label}
+                    </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
@@ -197,8 +234,16 @@ export default function Toolbar() {
           </LabeledSelect>
         </div>
 
-        <ToolbarButton tooltip="Calculate best route" onClick={handleCalculate} disabled={isCalculating}>
-          {isCalculating ? <Loader2 className="size-4 animate-spin" /> : <Route className="size-4" />}
+        <ToolbarButton
+          tooltip="Calculate best route"
+          onClick={handleCalculate}
+          disabled={isCalculating}
+        >
+          {isCalculating ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Route className="size-4" />
+          )}
         </ToolbarButton>
 
         <ToolbarButton tooltip="Reset problem" onClick={() => setConfirmReset(true)}>
@@ -236,14 +281,13 @@ export default function Toolbar() {
   )
 }
 
-
 type ToolbarButtonProps = {
-  children: ReactNode,
-  tooltip: string,
-  onClick: () => void,
-  activeClassName?: string,
-  active?: boolean,
-  disabled?: boolean,
+  children: ReactNode
+  tooltip: string
+  onClick: () => void
+  activeClassName?: string
+  active?: boolean
+  disabled?: boolean
   className?: string
 }
 
@@ -258,7 +302,10 @@ const LabeledSelect = ({ label, info, children }: LabeledSelectProps) => (
     <span className="text-xs text-muted-foreground whitespace-nowrap">{label}</span>
     <Popover>
       <PopoverTrigger asChild>
-        <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label={`Info about ${label}`}>
+        <button
+          className="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={`Info about ${label}`}
+        >
           <Info className="size-3" />
         </button>
       </PopoverTrigger>
@@ -281,9 +328,17 @@ const ToolbarButton = ({
 }: ToolbarButtonProps) => (
   <Tooltip>
     <TooltipTrigger asChild>
-      <Button variant={active ? "default" : "ghost"} size="icon-sm" onClick={onClick} disabled={disabled} className={
-        cn("p-4", active && (activeClassName ? activeClassName : "bg-green-500"), className)
-      }>
+      <Button
+        variant={active ? 'default' : 'ghost'}
+        size="icon-sm"
+        onClick={onClick}
+        disabled={disabled}
+        className={cn(
+          'p-4',
+          active && (activeClassName ? activeClassName : 'bg-green-500'),
+          className,
+        )}
+      >
         {children}
       </Button>
     </TooltipTrigger>

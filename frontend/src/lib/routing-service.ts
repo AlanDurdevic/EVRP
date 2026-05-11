@@ -3,8 +3,14 @@ import type { OptimizationTarget, VehicleMethod } from './evrp-store'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
-interface NormalizedCustomer extends Omit<Customer, 'x' | 'y'> { x: number; y: number }
-interface NormalizedStation extends Omit<ChargingStation, 'x' | 'y'> { x: number; y: number }
+interface NormalizedCustomer extends Omit<Customer, 'x' | 'y'> {
+  x: number
+  y: number
+}
+interface NormalizedStation extends Omit<ChargingStation, 'x' | 'y'> {
+  x: number
+  y: number
+}
 
 interface NormalizedProblem {
   depot: { x: 0; y: 0 }
@@ -27,7 +33,11 @@ export interface RoutingResult {
   routes: Route[]
 }
 
-function translateCoords<T extends { x: number; y: number }>(item: T, originX: number, originY: number): T {
+function translateCoords<T extends { x: number; y: number }>(
+  item: T,
+  originX: number,
+  originY: number,
+): T {
   return { ...item, x: item.x - originX, y: item.y - originY }
 }
 

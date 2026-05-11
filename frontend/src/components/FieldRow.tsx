@@ -1,4 +1,4 @@
-import { Label } from "./ui/label";
+import { Label } from './ui/label'
 
 export function FieldRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -8,4 +8,3 @@ export function FieldRow({ label, children }: { label: string; children: React.R
     </div>
   )
 }
-

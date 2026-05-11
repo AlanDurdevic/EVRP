@@ -1,8 +1,8 @@
-import MapView from "@/components/MapView";
-import AppSidebar from "@/components/Sidebar";
-import Toolbar from "@/components/Toolbar";
-import { KeyboardShortcutsDialog } from "@/components/KeyboardShortcutsDialog";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import MapView from '@/components/MapView'
+import AppSidebar from '@/components/Sidebar'
+import Toolbar from '@/components/Toolbar'
+import { KeyboardShortcutsDialog } from '@/components/KeyboardShortcutsDialog'
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
 export default function HomePage() {
   return (
@@ -14,7 +14,7 @@ export default function HomePage() {
           <SidebarInset>
             <div className="flex-1 flex overflow-hidden">
               <MapView />
-            </div >
+            </div>
           </SidebarInset>
         </div>
       </SidebarProvider>
@@ -22,4 +22,3 @@ export default function HomePage() {
     </div>
   )
 }
-

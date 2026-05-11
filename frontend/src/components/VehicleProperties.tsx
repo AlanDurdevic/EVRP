@@ -1,7 +1,7 @@
-import { useEVRPStore } from "@/lib/evrp-store"
-import { Settings } from "lucide-react"
-import { FieldRow } from "./FieldRow"
-import { Input } from "./ui/input"
+import { useEVRPStore } from '@/lib/evrp-store'
+import { Settings } from 'lucide-react'
+import { FieldRow } from './FieldRow'
+import { Input } from './ui/input'
 
 export function VehicleProperties() {
   const { problem, updateProblemProperties } = useEVRPStore()
@@ -20,7 +20,9 @@ export function VehicleProperties() {
             step="1"
             min="0"
             value={props.vehicleFuelTankCapacity}
-            onChange={(e) => updateProblemProperties({ vehicleFuelTankCapacity: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateProblemProperties({ vehicleFuelTankCapacity: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -30,7 +32,9 @@ export function VehicleProperties() {
             step="0.1"
             min="0"
             value={props.vehicleLoadCapacity}
-            onChange={(e) => updateProblemProperties({ vehicleLoadCapacity: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateProblemProperties({ vehicleLoadCapacity: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -40,7 +44,9 @@ export function VehicleProperties() {
             step="0.1"
             min="0"
             value={props.fuelConsumptionRate}
-            onChange={(e) => updateProblemProperties({ fuelConsumptionRate: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateProblemProperties({ fuelConsumptionRate: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -50,7 +56,9 @@ export function VehicleProperties() {
             step="0.1"
             min="0"
             value={props.inverseRefuelingRate}
-            onChange={(e) => updateProblemProperties({ inverseRefuelingRate: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateProblemProperties({ inverseRefuelingRate: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -60,7 +68,9 @@ export function VehicleProperties() {
             step="1"
             min="0"
             value={props.averageVelocity}
-            onChange={(e) => updateProblemProperties({ averageVelocity: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateProblemProperties({ averageVelocity: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>

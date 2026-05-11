@@ -1,9 +1,9 @@
-import { useEVRPStore } from "@/lib/evrp-store"
-import { Trash2, Users } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { FieldRow } from "../FieldRow"
+import { useEVRPStore } from '@/lib/evrp-store'
+import { Trash2, Users } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import { FieldRow } from '../FieldRow'
 
 export function CustomerProperties() {
   const { problem, selection, updateCustomer, removeCustomer } = useEVRPStore()
@@ -57,7 +57,9 @@ export function CustomerProperties() {
             step="0.1"
             min="0"
             value={customer.demand}
-            onChange={(e) => updateCustomer(customer.id, { demand: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateCustomer(customer.id, { demand: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -67,7 +69,9 @@ export function CustomerProperties() {
             step="0.1"
             min="0"
             value={customer.readyTime}
-            onChange={(e) => updateCustomer(customer.id, { readyTime: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateCustomer(customer.id, { readyTime: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -77,7 +81,9 @@ export function CustomerProperties() {
             step="0.1"
             min="0"
             value={customer.dueDate}
-            onChange={(e) => updateCustomer(customer.id, { dueDate: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateCustomer(customer.id, { dueDate: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>
@@ -87,7 +93,9 @@ export function CustomerProperties() {
             step="0.1"
             min="0"
             value={customer.serviceTime}
-            onChange={(e) => updateCustomer(customer.id, { serviceTime: parseFloat(e.target.value) || 0 })}
+            onChange={(e) =>
+              updateCustomer(customer.id, { serviceTime: parseFloat(e.target.value) || 0 })
+            }
             className="h-8 text-sm"
           />
         </FieldRow>

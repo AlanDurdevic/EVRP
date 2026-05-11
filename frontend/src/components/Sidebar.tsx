@@ -1,22 +1,22 @@
-import { useEVRPStore } from "@/lib/evrp-store"
-import { List, MousePointer, Settings, Zap } from "lucide-react"
-import { CustomerProperties } from "./property-editors/CustomerProperties"
-import { DepotProperties } from "./property-editors/DepotProperties"
-import { StationProperties } from "./property-editors/StationProperties"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "./ui/sidebar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import { VehicleProperties } from "./VehicleProperties"
-import { ElementsList } from "./ElementsList"
+import { useEVRPStore } from '@/lib/evrp-store'
+import { List, MousePointer, Settings, Zap } from 'lucide-react'
+import { CustomerProperties } from './property-editors/CustomerProperties'
+import { DepotProperties } from './property-editors/DepotProperties'
+import { StationProperties } from './property-editors/StationProperties'
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from './ui/sidebar'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs'
+import { VehicleProperties } from './VehicleProperties'
+import { ElementsList } from './ElementsList'
 
 export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const activeTab = useEVRPStore((s) => s.activeTab)
   const setActiveTab = useEVRPStore((s) => s.setActiveTab)
   return (
-    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'elements' | 'settings' | 'vehicles')}>
-      <Sidebar
-        className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
-        {...props}
-      >
+    <Tabs
+      value={activeTab}
+      onValueChange={(v) => setActiveTab(v as 'elements' | 'settings' | 'vehicles')}
+    >
+      <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]!" {...props}>
         <SidebarHeader className="border-b border-gray-200">
           <TabsList className="w-full bg-transparent">
             <TabsTrigger value="elements" className="flex-1 gap-2 py-4">
@@ -36,7 +36,6 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
           </TabsList>
         </SidebarHeader>
 
-
         <SidebarContent className="flex-1 mt-0 overflow-hidden">
           <TabsContent value="elements" className="h-full p-4">
             <ElementsList />
@@ -51,15 +50,11 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
           </TabsContent>
         </SidebarContent>
 
-
-        <SidebarFooter>
-        </SidebarFooter>
+        <SidebarFooter></SidebarFooter>
       </Sidebar>
     </Tabs>
   )
 }
-
-
 
 function SelectionContent() {
   const { selection } = useEVRPStore()
