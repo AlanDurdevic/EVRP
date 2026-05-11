@@ -56,8 +56,10 @@ public class EVRPService {
                 new UniformDistribution(2),
                 new UniformDistribution(2));
 
+        // FOR EVERY TYPE OF PROBLEM YOU NEED TO INSTIANCIATE A NEW OBJECT, (serial, parallel, semiparalel, paralelB, and semiparlaleB)
         GeneticProgrammingStohasticEVRP gp = new GeneticProgrammingStohasticEVRPSerialVehicle(problem);
 
+        // DONT CALL THIS, LOAD GENOTYPE FROM THE RESULTS FOLDER, SECOND LINE
         final Genotype<ProgramGene<Double>> programDynamics = gp.calculate();
 
         List<Vehicle> usedVehicles = gp.getUsedVehicles(programDynamics);
