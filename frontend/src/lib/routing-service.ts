@@ -17,6 +17,8 @@ interface NormalizedProblem {
   problemProperties: EVRPProblem['problemProperties']
   customers: NormalizedCustomer[]
   chargingStations: NormalizedStation[]
+  optimizationTarget: OptimizationTarget
+  vehicleMethod: VehicleMethod
 }
 
 interface RouteLocation {
@@ -41,23 +43,24 @@ function translateCoords<T extends { x: number; y: number }>(
   return { ...item, x: item.x - originX, y: item.y - originY }
 }
 
-function normalizeProblem(problem: EVRPProblem): NormalizedProblem {
+function normalizeProblem(
+  problem: EVRPProblem,
+  optimizationTarget: OptimizationTarget,
+  vehicleMethod: VehicleMethod,
+): NormalizedProblem {
   const { depot, customers, chargingStations, problemProperties } = problem
   return {
     depot: { x: 0, y: 0 },
     problemProperties,
     customers: customers.map((c) => translateCoords(c, depot.x, depot.y)),
     chargingStations: chargingStations.map((s) => translateCoords(s, depot.x, depot.y)),
+    optimizationTarget,
+    vehicleMethod,
   }
 }
 
-async function callRoutingApi(
-  payload: NormalizedProblem,
-  optimizationTarget: OptimizationTarget,
-  vehicleMethod: VehicleMethod,
-): Promise<RoutingResult> {
-  const params = new URLSearchParams({ optimizationTarget, vehicleMethod })
-  const response = await fetch(`${API_BASE_URL}/api/evrp/solve?${params}`, {
+async function callRoutingApi(payload: NormalizedProblem): Promise<RoutingResult> {
+  const response = await fetch(`${API_BASE_URL}/api/evrp/solve`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -75,8 +78,8 @@ export async function calculateRoute(
   optimizationTarget: OptimizationTarget,
   vehicleMethod: VehicleMethod,
 ): Promise<RoutingResult> {
-  const normalized = normalizeProblem(problem)
-  const result = await callRoutingApi(normalized, optimizationTarget, vehicleMethod)
+  const normalized = normalizeProblem(problem, optimizationTarget, vehicleMethod)
+  const result = await callRoutingApi(normalized)
   console.log('Routing result:', result)
   return result
 }

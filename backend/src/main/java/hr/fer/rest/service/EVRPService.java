@@ -9,6 +9,7 @@ import hr.fer.rest.mapper.EvrpMapper;
 import io.jenetics.Genotype;
 import io.jenetics.prog.ProgramGene;
 import lombok.NonNull;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -17,8 +18,9 @@ import java.util.Optional;
 
 import static java.util.Objects.requireNonNull;
 
+@Primary
 @Service
-public class EVRPService {
+public class EVRPService implements EVRPSolverService {
 
     private final EvrpMapper evrpMapper;
 

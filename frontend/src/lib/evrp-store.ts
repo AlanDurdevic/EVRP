@@ -11,17 +11,7 @@ import type { RoutingResult } from './routing-service'
 
 export type SidebarTab = 'elements' | 'settings' | 'vehicles'
 export type OptimizationTarget = 'energy' | 'tardiness' | 'vehicle'
-export type VehicleMethod =
-  | 'parallel'
-  | 'parallelB'
-  | 'semiparallel'
-  | 'semiparallelB'
-  | 'serial'
-  | 'parallel-iterations'
-  | 'parallelB-iterations'
-  | 'semiparallel-iterations'
-  | 'semiparallelB-iterations'
-  | 'serial-iterations'
+export type VehicleMethod = 'parallel' | 'parallelB' | 'semiparallel' | 'semiparallelB' | 'serial'
 
 interface EVRPStore {
   problem: EVRPProblem

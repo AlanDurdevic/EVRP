@@ -3,6 +3,7 @@ package hr.fer.rest.controller;
 import hr.fer.rest.dto.SolveRequestDTO;
 import hr.fer.rest.dto.SolveResponseDTO;
 import hr.fer.rest.service.EVRPService;
+import hr.fer.rest.service.EVRPSolverService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +15,7 @@ import java.util.Map;
 public class EVRPController {
 
     @Autowired
-    private EVRPService vrpService;
+    private EVRPSolverService vrpService;
 
     @GetMapping
     public Map<String, Object> index() {
