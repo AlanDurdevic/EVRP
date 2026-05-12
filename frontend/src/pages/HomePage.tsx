@@ -3,6 +3,7 @@ import AppSidebar from '@/components/Sidebar'
 import Toolbar from '@/components/Toolbar'
 import { KeyboardShortcutsDialog } from '@/components/KeyboardShortcutsDialog'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Toaster } from '@/components/ui/sonner'
 
 export default function HomePage() {
   return (
@@ -19,6 +20,7 @@ export default function HomePage() {
         </div>
       </SidebarProvider>
       <KeyboardShortcutsDialog />
+      <Toaster richColors position="bottom-right" />
     </div>
   )
 }

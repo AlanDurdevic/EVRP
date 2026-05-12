@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { ConfirmDialog } from './ConfirmDialog'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
@@ -75,6 +76,9 @@ export default function Toolbar() {
     a.download = 'evrp-problem.json'
     a.click()
     URL.revokeObjectURL(url)
+    toast.success('Problem exported', {
+      description: `${data.customers.length} customers, ${data.chargingStations.length} stations saved to evrp-problem.json`,
+    })
   }
 
   const handleCalculate = async () => {
@@ -82,6 +86,13 @@ export default function Toolbar() {
     try {
       const result = await calculateRoute(problem, optimizationTarget, vehicleMethod)
       setRoutingResult(result)
+      toast.success('Routes calculated', {
+        description: `${result.routes.length} vehicle route${result.routes.length !== 1 ? 's' : ''} found.`,
+      })
+    } catch (err) {
+      toast.error('Calculation failed', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred.',
+      })
     } finally {
       setIsCalculating(false)
     }
@@ -96,9 +107,13 @@ export default function Toolbar() {
       if (!file) return
       try {
         const text = await file.text()
-        importProblem(JSON.parse(text))
+        const parsed = JSON.parse(text)
+        importProblem(parsed)
+        toast.success('Problem imported', {
+          description: `${parsed.customers.length} customers, ${parsed.chargingStations.length} stations loaded from ${file.name}`,
+        })
       } catch {
-        console.error('Failed to import problem: invalid JSON')
+        toast.error('Import failed', { description: 'The file is not a valid EVRP problem JSON.' })
       }
     }
     input.click()

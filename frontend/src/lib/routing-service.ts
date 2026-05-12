@@ -67,7 +67,9 @@ async function callRoutingApi(payload: NormalizedProblem): Promise<RoutingResult
   })
 
   if (!response.ok) {
-    throw new Error(`Routing API error: ${response.status} ${response.statusText}`)
+    const body = await response.json().catch(() => null)
+    const message = body?.message ?? `${response.status} ${response.statusText}`
+    throw new Error(message)
   }
 
   return response.json()

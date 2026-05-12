@@ -14,31 +14,15 @@ export type OptimizationTarget = 'energy' | 'tardiness' | 'vehicle'
 export type VehicleMethod = 'parallel' | 'parallelB' | 'semiparallel' | 'semiparallelB' | 'serial'
 
 interface EVRPStore {
+  // --- Problem ---
   problem: EVRPProblem
-  selection: Selection
-  placementMode: PlacementMode
-  activeTab: SidebarTab
-  hoveredId: string | null
-  mapBounds: { minX: number; maxX: number; minY: number; maxY: number }
   customerCounter: number
   stationCounter: number
-  routingResult: RoutingResult | null
-  customersVisible: boolean
-  stationsVisible: boolean
-  routeVisibility: Record<number, boolean>
-  optimizationTarget: OptimizationTarget
-  vehicleMethod: VehicleMethod
 
-  // Actions
-  setOptimizationTarget: (target: OptimizationTarget) => void
-  setVehicleMethod: (method: VehicleMethod) => void
   nextCustomerId: () => string
   nextStationId: () => string
-  toggleCustomersVisible: () => void
-  toggleStationsVisible: () => void
-  toggleRouteVisible: (index: number) => void
   setDepot: (depot: Depot) => void
-  setActiveTab: (tab: SidebarTab) => void
+  removeDepot: () => void
   addCustomer: (customer: Customer) => void
   updateCustomer: (id: string, updates: Partial<Customer>) => void
   removeCustomer: (id: string) => void
@@ -47,16 +31,38 @@ interface EVRPStore {
   updateStation: (id: string, updates: Partial<ChargingStation>) => void
   removeStation: (id: string) => void
   clearStations: () => void
-  removeDepot: () => void
   updateProblemProperties: (props: Partial<EVRPProblem['problemProperties']>) => void
-  setSelection: (selection: Selection) => void
-  setPlacementMode: (mode: PlacementMode) => void
-  setHoveredId: (id: string | null) => void
-  clearSelection: () => void
   exportProblem: () => EVRPProblem
   importProblem: (problem: EVRPProblem) => void
   resetProblem: () => void
+
+  // --- UI ---
+  selection: Selection
+  placementMode: PlacementMode
+  activeTab: SidebarTab
+  hoveredId: string | null
+  mapBounds: { minX: number; maxX: number; minY: number; maxY: number }
+  customersVisible: boolean
+  stationsVisible: boolean
+
+  setSelection: (selection: Selection) => void
+  clearSelection: () => void
+  setPlacementMode: (mode: PlacementMode) => void
+  setActiveTab: (tab: SidebarTab) => void
+  setHoveredId: (id: string | null) => void
+  toggleCustomersVisible: () => void
+  toggleStationsVisible: () => void
+
+  // --- Routing ---
+  optimizationTarget: OptimizationTarget
+  vehicleMethod: VehicleMethod
+  routingResult: RoutingResult | null
+  routeVisibility: Record<number, boolean>
+
+  setOptimizationTarget: (target: OptimizationTarget) => void
+  setVehicleMethod: (method: VehicleMethod) => void
   setRoutingResult: (result: RoutingResult | null) => void
+  toggleRouteVisible: (index: number) => void
 }
 
 const initialProblem: EVRPProblem = {
@@ -73,30 +79,10 @@ const initialProblem: EVRPProblem = {
 }
 
 export const useEVRPStore = create<EVRPStore>((set, get) => ({
+  // --- Problem ---
   problem: initialProblem,
-  selection: { type: null, id: null },
-  placementMode: 'select',
-  activeTab: 'elements',
-  hoveredId: null as string | null,
-  mapBounds: { minX: 0, maxX: 10, minY: 0, maxY: 10 },
   customerCounter: 0,
-  routingResult: null,
   stationCounter: 0,
-  customersVisible: true,
-  stationsVisible: true,
-  routeVisibility: {},
-  optimizationTarget: 'energy' as OptimizationTarget,
-  vehicleMethod: 'parallel' as VehicleMethod,
-
-  setOptimizationTarget: (target) => set({ optimizationTarget: target }),
-  setVehicleMethod: (method) => set({ vehicleMethod: method }),
-
-  toggleCustomersVisible: () => set((s) => ({ customersVisible: !s.customersVisible })),
-  toggleStationsVisible: () => set((s) => ({ stationsVisible: !s.stationsVisible })),
-  toggleRouteVisible: (index) =>
-    set((s) => ({
-      routeVisibility: { ...s.routeVisibility, [index]: !(s.routeVisibility[index] ?? true) },
-    })),
 
   nextCustomerId: () => {
     const n = get().customerCounter + 1
@@ -109,20 +95,17 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
     return `station-${n}`
   },
 
-  setActiveTab: (tab) => set({ activeTab: tab }),
-  setHoveredId: (id) => set({ hoveredId: id }),
+  setDepot: (depot) => set((state) => ({ problem: { ...state.problem, depot } })),
 
-  setDepot: (depot) =>
+  removeDepot: () =>
     set((state) => ({
-      problem: { ...state.problem, depot },
+      problem: { ...state.problem, depot: { id: 'depot', x: 0, y: 0 } },
+      selection: state.selection.type === 'depot' ? { type: null, id: null } : state.selection,
     })),
 
   addCustomer: (customer) =>
     set((state) => ({
-      problem: {
-        ...state.problem,
-        customers: [...state.problem.customers, customer],
-      },
+      problem: { ...state.problem, customers: [...state.problem.customers, customer] },
     })),
 
   updateCustomer: (id, updates) =>
@@ -146,18 +129,6 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
     set((state) => ({
       problem: { ...state.problem, customers: [] },
       selection: state.selection.type === 'customer' ? { type: null, id: null } : state.selection,
-    })),
-
-  clearStations: () =>
-    set((state) => ({
-      problem: { ...state.problem, chargingStations: [] },
-      selection: state.selection.type === 'station' ? { type: null, id: null } : state.selection,
-    })),
-
-  removeDepot: () =>
-    set((state) => ({
-      problem: { ...state.problem, depot: { id: 'depot', x: 0, y: 0 } },
-      selection: state.selection.type === 'depot' ? { type: null, id: null } : state.selection,
     })),
 
   addStation: (station) =>
@@ -187,6 +158,12 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
       selection: state.selection.id === id ? { type: null, id: null } : state.selection,
     })),
 
+  clearStations: () =>
+    set((state) => ({
+      problem: { ...state.problem, chargingStations: [] },
+      selection: state.selection.type === 'station' ? { type: null, id: null } : state.selection,
+    })),
+
   updateProblemProperties: (props) =>
     set((state) => ({
       problem: {
@@ -194,12 +171,6 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
         problemProperties: { ...state.problem.problemProperties, ...props },
       },
     })),
-
-  setSelection: (selection) => set({ selection }),
-
-  setPlacementMode: (mode) => set({ placementMode: mode }),
-
-  clearSelection: () => set({ selection: { type: null, id: null } }),
 
   exportProblem: () => get().problem,
 
@@ -225,5 +196,34 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
       routeVisibility: {},
     }),
 
+  // --- UI ---
+  selection: { type: null, id: null },
+  placementMode: 'select',
+  activeTab: 'elements',
+  hoveredId: null as string | null,
+  mapBounds: { minX: 0, maxX: 10, minY: 0, maxY: 10 },
+  customersVisible: true,
+  stationsVisible: true,
+
+  setSelection: (selection) => set({ selection }),
+  clearSelection: () => set({ selection: { type: null, id: null } }),
+  setPlacementMode: (mode) => set({ placementMode: mode }),
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  setHoveredId: (id) => set({ hoveredId: id }),
+  toggleCustomersVisible: () => set((s) => ({ customersVisible: !s.customersVisible })),
+  toggleStationsVisible: () => set((s) => ({ stationsVisible: !s.stationsVisible })),
+
+  // --- Routing ---
+  optimizationTarget: 'energy' as OptimizationTarget,
+  vehicleMethod: 'parallel' as VehicleMethod,
+  routingResult: null,
+  routeVisibility: {},
+
+  setOptimizationTarget: (target) => set({ optimizationTarget: target }),
+  setVehicleMethod: (method) => set({ vehicleMethod: method }),
   setRoutingResult: (result) => set({ routingResult: result, routeVisibility: {} }),
+  toggleRouteVisible: (index) =>
+    set((s) => ({
+      routeVisibility: { ...s.routeVisibility, [index]: !(s.routeVisibility[index] ?? true) },
+    })),
 }))

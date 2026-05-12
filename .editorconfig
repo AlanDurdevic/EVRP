@@ -1,0 +1,51 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = tab
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.java]
+max_line_length = 120
+indent_size = 4
+
+# Wrap method call arguments: each arg on its own line when the call is too long
+ij_java_call_parameters_wrap = chop_down_if_long
+ij_java_call_parameters_lparen_on_next_line = false
+ij_java_call_parameters_rparen_on_next_line = true
+
+# Wrap method declaration parameters the same way
+ij_java_method_parameters_wrap = chop_down_if_long
+ij_java_method_parameters_lparen_on_next_line = false
+ij_java_method_parameters_rparen_on_next_line = true
+
+# Wrap chained method calls
+ij_java_method_call_chain_wrap = if_long
+
+# Wrap array initializers
+ij_java_array_initializer_wrap = chop_down_if_long
+ij_java_array_initializer_lbrace_on_next_line = false
+ij_java_array_initializer_rbrace_on_next_line = true
+
+# Align arguments when wrapped
+ij_java_align_multiline_parameters = false
+ij_java_align_multiline_method_call_arguments = false
+
+# Keep existing line breaks
+ij_java_keep_line_breaks = true
+ij_java_keep_first_column_comment = true
+
+[*.{ts,tsx,js,jsx}]
+max_line_length = 100
+indent_size = 2
+indent_style = space
+
+[*.{json,yaml,yml}]
+indent_size = 2
+indent_style = space
+
+[*.{gradle,kts}]
+indent_size = 4
+max_line_length = 120
