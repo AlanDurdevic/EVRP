@@ -63,8 +63,13 @@ async function callRoutingApi(payload: NormalizedProblem): Promise<RoutingResult
   const response = await fetch(`${API_BASE_URL}/api/evrp/solve`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(payload),
   })
+
+  if (response.status === 401) {
+    throw new Error('Session expired — please sign in again')
+  }
 
   if (!response.ok) {
     const body = await response.json().catch(() => null)

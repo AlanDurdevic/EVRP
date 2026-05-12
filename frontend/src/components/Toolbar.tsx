@@ -1,5 +1,6 @@
 import { useEVRPStore } from '@/lib/evrp-store'
 import type { OptimizationTarget, VehicleMethod } from '@/lib/evrp-store'
+import { logout } from '@/lib/auth-service'
 import { calculateRoute } from '@/lib/routing-service'
 import { cn } from '@/lib/utils'
 import {
@@ -7,6 +8,7 @@ import {
   Eraser,
   Info,
   Loader2,
+  LogOut,
   MapPin,
   MousePointer,
   Route,
@@ -62,6 +64,7 @@ export default function Toolbar() {
     vehicleMethod,
     setOptimizationTarget,
     setVehicleMethod,
+    setAuthenticated,
   } = useEVRPStore()
   const [confirmReset, setConfirmReset] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
@@ -283,6 +286,16 @@ export default function Toolbar() {
             <span>Stations: {problem.chargingStations.length}</span>
           </div>
         </div>
+
+        <ToolbarButton
+          tooltip="Sign out"
+          onClick={async () => {
+            await logout()
+            setAuthenticated(false)
+          }}
+        >
+          <LogOut className="size-4" />
+        </ToolbarButton>
       </header>
 
       <ConfirmDialog

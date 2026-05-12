@@ -14,6 +14,12 @@ export type OptimizationTarget = 'energy' | 'tardiness' | 'vehicle'
 export type VehicleMethod = 'parallel' | 'parallelB' | 'semiparallel' | 'semiparallelB' | 'serial'
 
 interface EVRPStore {
+  // --- Auth ---
+  isAuthenticated: boolean
+  isCheckingAuth: boolean
+  setAuthenticated: (v: boolean) => void
+  setCheckingAuth: (v: boolean) => void
+
   // --- Problem ---
   problem: EVRPProblem
   customerCounter: number
@@ -79,6 +85,12 @@ const initialProblem: EVRPProblem = {
 }
 
 export const useEVRPStore = create<EVRPStore>((set, get) => ({
+  // --- Auth ---
+  isAuthenticated: false,
+  isCheckingAuth: true,
+  setAuthenticated: (v) => set({ isAuthenticated: v }),
+  setCheckingAuth: (v) => set({ isCheckingAuth: v }),
+
   // --- Problem ---
   problem: initialProblem,
   customerCounter: 0,

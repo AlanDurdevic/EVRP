@@ -1,0 +1,13 @@
+spring:
+  devtools:
+    livereload:
+      enabled: false
+    restart:
+      enabled: false
+
+cors:
+  allowed-origin: ${CORS_ORIGIN}
+
+app:
+  username: ${APP_USERNAME}
+  password: ${APP_PASSWORD}
