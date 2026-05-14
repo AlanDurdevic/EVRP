@@ -1,0 +1,9 @@
+evrp.nlukic.com {
+    root * /srv
+    file_server
+    try_files {path} /index.html
+}
+
+evrp-api.nlukic.com {
+    reverse_proxy backend:8080
+}

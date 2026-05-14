@@ -1,22 +1,25 @@
 services:
   backend:
-    build: .
+    build: ./backend
     restart: unless-stopped
     expose:
       - "8080"
-    env_file: .env
+    env_file:
+      - path: ./backend/.env
+        required: false
     environment:
       SPRING_PROFILES_ACTIVE: prod
 
-  caddy:
-    image: caddy:2-alpine
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
       - "443:443/udp"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
