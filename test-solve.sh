@@ -79,7 +79,13 @@ if echo "$RESPONSE" | jq -e '.routes' > /dev/null 2>&1; then
   ROUTE_COUNT=$(echo "$RESPONSE" | jq '.routes | length')
   echo "SUCCESS: $ROUTE_COUNT route(s) returned"
   echo ""
-  echo "$RESPONSE" | jq '.routes[] | { stops: (.locations | length), ids: [.locations[].id] }'
+  echo "$RESPONSE" | jq '.routes[] | {
+    stops: (.locations | length),
+    ids: [.locations[].id],
+    polyline_segments: (.polylines | length),
+    first_segment_points: (.polylines[0] | if . then length else null end),
+    first_segment_sample: (.polylines[0] | if . then .[0:2] else null end)
+  }'
 elif echo "$RESPONSE" | jq -e '.error' > /dev/null 2>&1; then
   echo "ERROR: $(echo "$RESPONSE" | jq -r '.error')"
 else

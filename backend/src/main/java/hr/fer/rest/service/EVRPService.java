@@ -44,8 +44,11 @@ public class EVRPService implements EVRPSolverService {
 
     private final DistanceMatrixService distanceMatrixService;
 
-	public EVRPService(DistanceMatrixService distanceMatrixService, EvrpMapper evrpMapper, ProgramRepository programRepository, ProgramParserService programParserService) {
+    private final PolylineService polylineService;
+
+	public EVRPService(DistanceMatrixService distanceMatrixService, PolylineService polylineService, EvrpMapper evrpMapper, ProgramRepository programRepository, ProgramParserService programParserService) {
 		this.distanceMatrixService = distanceMatrixService;
+		this.polylineService = polylineService;
 		this.evrpMapper = evrpMapper;
 		this.programRepository = programRepository;
 		this.programParserService = programParserService;
@@ -121,12 +124,16 @@ public class EVRPService implements EVRPSolverService {
 
         List<Vehicle> usedVehicles = gp.getUsedVehicles(genotype);
 
-        List<List<Location>> domainRoutes =
-                usedVehicles.stream().map(Vehicle::getRoute).toList();
-
-        List<RouteDTO> routes = domainRoutes.stream()
-                .map(evrpMapper::toLocationDtoList)
-                .map(RouteDTO::new)
+        List<RouteDTO> routes = usedVehicles.stream()
+                .map(vehicle -> {
+                    List<Location> route = vehicle.getRoute();
+                    List<LocationDTO> locations = evrpMapper.toLocationDtoList(route);
+                    List<List<double[]>> polylines = new ArrayList<>();
+                    for (int i = 0; i < route.size() - 1; i++) {
+                        polylines.add(polylineService.fetchPolyline(route.get(i), route.get(i + 1)));
+                    }
+                    return new RouteDTO(locations, polylines);
+                })
                 .toList();
 
         return new SolveResponseDTO(routes);
