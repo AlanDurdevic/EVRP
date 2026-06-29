@@ -22,3 +22,7 @@ app:
 
 osrm:
   base-url: https://router.project-osrm.org
+
+logging:
+  level:
+    hr.fer.evrp: WARN

@@ -5,14 +5,23 @@ import hr.fer.evrp.operators.cs.CustomerSelector;
 import hr.fer.evrp.operators.vs.VehicleSupplier;
 import hr.fer.evrp.util.stohastic.distribution.Distribution;
 import io.jenetics.Gene;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends SolutionEVRP<T> {
 
+	private static final Logger log = LoggerFactory.getLogger(StohasticSolutionEVRP.class);
+
 	public StohasticSolutionEVRP(StohasticEVRPProblem problem) {
 		super(problem);
+	}
+
+	private static String routeStr(Vehicle v) {
+		return v.getRoute().stream().map(Location::getId).collect(Collectors.joining(" → "));
 	}
 
 	@Override
@@ -35,8 +44,18 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			Vehicle v = vehicleSupplier.getVehicle();
 			Customer c = cs.selectCustomer(v, UC, problem, vehicleSupplier.getVehicles());
 			Location destination = c;
-			if (c == null || v.getLoadCapacityLeft() < c.getDemand()) {
+			if (c == null) {
+				log.debug("V{} at {} — no customer selected, returning to depot (UC={})",
+						v.getId(), v.getCurrentLocation().getId(), UC.size());
 				destination = depot;
+			} else if (v.getLoadCapacityLeft() < c.getDemand()) {
+				log.debug("V{} at {} — insufficient load for {} (demand={}, left={}), returning to depot",
+						v.getId(), v.getCurrentLocation().getId(), c.getId(), c.getDemand(), v.getLoadCapacityLeft());
+				destination = depot;
+			} else {
+				log.debug("V{} at {} — heading to customer {} (fuel={:.1f}, load={})",
+						v.getId(), v.getCurrentLocation().getId(), c.getId(),
+						v.getFuelCapacityLeft(), v.getLoadCapacityLeft());
 			}
 
 			double fuelNeeded = fuelConsumptionRate * (problem.distance(v.getCurrentLocation(), destination));
@@ -45,15 +64,23 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 						* problem.distance(destination, customerDest.getNearestChargingStation());
 			}
 			if (v.getFuelCapacityLeft() < fuelNeeded) {
+				log.debug("V{} at {} — low fuel (have={:.1f}, need={:.1f}), seeking charging station",
+						v.getId(), v.getCurrentLocation().getId(), v.getFuelCapacityLeft(), fuelNeeded);
 				ChargingStation chargingStation = chooseChargingStation(v, destination);
 				if (chargingStation == null) {
+					log.warn("V{} at {} — no reachable charging station toward {}, diverting to depot",
+							v.getId(), v.getCurrentLocation().getId(),
+							destination instanceof Customer ? destination.getId() : "depot");
 					double fuel = fuelConsumptionRate * problem.distance(v.getCurrentLocation(), depot);
 					if (fuel > v.getFuelCapacityLeft()) {
+						log.warn("V{} at {} — cannot even reach depot (need={:.1f}, have={:.1f}), emergency CS",
+								v.getId(), v.getCurrentLocation().getId(), fuel, v.getFuelCapacityLeft());
 						chargingStation = chooseChargingStation(v, depot);
 					}
 					destination = depot;
 				}
 				if (chargingStation != null) {
+					log.debug("V{} charging at {}", v.getId(), chargingStation.getId());
 					charge(v, chargingStation);
 				}
 
@@ -81,6 +108,8 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 					UC.remove(c);
 					vehicleSupplier.addVehicle(v);
 				} else {
+					log.debug("V{} arrived at {} but stochastic demand {} exceeded load left {}, skipping",
+							v.getId(), destination.getId(), demand, v.getLoadCapacityLeft());
 					v.addLocation(new Customer((Customer) destination, 0, 0));
 					// check if can return to depot
 					distance = problem.distance(destination, depot);
@@ -98,9 +127,11 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 					fuel = fuelConsumptionRate * distance;
 					v.subtractFuelCapacity(fuel);
 					v.addLocation(destination);
+					log.info("V{} returned to depot — route: {}", v.getId(), routeStr(v));
 					usedVehicles.add(v);
 					vehicleSupplier.vehicleFinished(v, UC);
 					if (!vehicleSupplier.hasMoreVehicles() && !UC.isEmpty()) {
+						log.info("Deploying vehicle V{} ({} customers remaining)", numberOfVehicles, UC.size());
 						vehicleSupplier.addVehicle(new Vehicle(numberOfVehicles++, problem.getVehicleFuelTankCapacity(),
 								problem.getVehicleLoadCapacity(), depot));
 					}
@@ -108,10 +139,12 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			} else {
 				v.addLocation(destination);
 				// returning vehicle to depot
+				log.info("V{} returned to depot — route: {}", v.getId(), routeStr(v));
 				usedVehicles.add(v);
 				vehicleSupplier.vehicleFinished(v, UC);
 
 				if (!vehicleSupplier.hasMoreVehicles() && !UC.isEmpty()) {
+					log.info("Deploying vehicle V{} ({} customers remaining)", numberOfVehicles, UC.size());
 					vehicleSupplier.addVehicle(new Vehicle(numberOfVehicles++, problem.getVehicleFuelTankCapacity(),
 							problem.getVehicleLoadCapacity(), depot));
 				}
@@ -129,6 +162,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		double distance = problem.distance(v.getCurrentLocation(), chargingStation);
 		double time = distance / velocity;
 		v.addTime(time);
+		double fuelBefore = v.getFuelCapacityLeft();
 		double fuel = problem.getFuelConsumptionRate() * distance;
 		v.subtractFuelCapacity(fuel);
 		v.addLocation(chargingStation);
@@ -137,6 +171,8 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		time = capacityToCharge * problem.getInverseRefuelingRate();
 		v.addTime(time);
 		v.setFuelCapacity(problem.getVehicleFuelTankCapacity());
+		log.debug("V{} charged at {} (fuel {:.1f} → {:.1f}, travel {:.0f}m)",
+				v.getId(), chargingStation.getId(), fuelBefore, v.getFuelCapacityLeft(), distance);
 	}
 
 	// choose station with lowest energy consumption
@@ -148,6 +184,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 
 		ChargingStation bestChargingStation = null;
 		double bestEnergy = Double.MAX_VALUE;
+		int skippedOutOfRange = 0;
 		for (ChargingStation cs : problem.getChargingStations()) {
 			double fuelCapacityLeft = v.getFuelCapacityLeft();
 			double distanceLCS = problem.distance(currentLocation, cs);
@@ -167,8 +204,15 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 						bestEnergy = energy;
 					}
 				}
-
+			} else {
+				skippedOutOfRange++;
 			}
+		}
+		if (bestChargingStation == null) {
+			log.warn("V{} at {} — no charging station reachable toward {} (fuel={:.1f}, {} stations checked, {} out of range)",
+					v.getId(), currentLocation.getId(),
+					location.getId(), v.getFuelCapacityLeft(),
+					problem.getChargingStations().size(), skippedOutOfRange);
 		}
 		return bestChargingStation;
 	}

@@ -2,6 +2,8 @@ package hr.fer.evrp.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,6 +11,8 @@ import java.util.Objects;
 
 @Getter
 public class Vehicle {
+
+	private static final Logger log = LoggerFactory.getLogger(Vehicle.class);
 
 	@Getter
 	@AllArgsConstructor
@@ -72,12 +76,12 @@ public class Vehicle {
 //			System.out.println("Greška CT " + location.getId() + " current time: " + currentTime + " due time: " + location.getDueDate());
 //		}
 		if (fuelCapacityLeft < 0) {
-			System.out.println("Greška FC");
-			throw new RuntimeException();
+			log.error("V{} fuel went negative ({:.2f}) while adding location {}", id, fuelCapacityLeft, location.getId());
+			throw new RuntimeException("Vehicle " + id + " fuel negative: " + fuelCapacityLeft);
 		}
 		if (loadCapacityLeft < location.getDemand()) {
-			System.out.println("Greška LC");
-			throw new RuntimeException();
+			log.error("V{} load capacity exceeded at {} (left={:.2f}, demand={:.2f})", id, location.getId(), loadCapacityLeft, location.getDemand());
+			throw new RuntimeException("Vehicle " + id + " load exceeded at " + location.getId());
 		}
 		route.add(location);
 		state.add(new State(currentTime, fuelCapacityLeft, loadCapacityLeft));

@@ -250,18 +250,20 @@ export const ElementsList = () => {
                 return (
                   <div
                     key={index}
-                    className="flex items-center gap-2 h-9 px-2 rounded-md hover:bg-accent transition-colors duration-150"
+                    className="flex items-center gap-2 min-h-9 py-1 px-2 rounded-md hover:bg-accent transition-colors duration-150"
                   >
                     <div
                       className="size-3 rounded-full shrink-0"
                       style={{ backgroundColor: color }}
                     />
                     <Route className="size-4 text-muted-foreground shrink-0" />
-                    <span className="text-sm">Route {index + 1}</span>
-                    <span className="ml-auto text-xs text-muted-foreground shrink-0">
-                      {stopCount} stop{stopCount !== 1 ? 's' : ''} ·{' '}
-                      {(route.totalDistanceMeters / 1000).toFixed(2)} km
-                    </span>
+                    <div className="flex flex-col min-w-0 flex-1">
+                      <span className="text-sm leading-tight">Route {index + 1}</span>
+                      <span className="text-xs text-muted-foreground leading-tight">
+                        {stopCount} stop{stopCount !== 1 ? 's' : ''} ·{' '}
+                        {(route.totalDistanceMeters / 1000).toFixed(2)} km
+                      </span>
+                    </div>
                     <button
                       onClick={() => toggleRouteVisible(index)}
                       className="p-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
