@@ -16,10 +16,10 @@ import io.jenetics.prog.ProgramGene;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
+
+import hr.fer.rest.exception.SolverTimeoutException;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,6 +27,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNull;
 
@@ -35,6 +41,7 @@ import static java.util.Objects.requireNonNull;
 public class EVRPService implements EVRPSolverService {
 
     private static final Logger log = LoggerFactory.getLogger(EVRPService.class);
+    private static final int SOLVER_TIMEOUT_SECONDS = 5;
 
     private final EvrpMapper evrpMapper;
 
@@ -78,7 +85,9 @@ public class EVRPService implements EVRPSolverService {
         }
 
         // fetch real road distance matrix from OSRM — throws RoutingServiceException if unreachable
+        long t0 = System.currentTimeMillis();
         double[][] distanceMatrix = distanceMatrixService.buildMatrix(coordinates);
+        log.info("OSRM /table took {}ms", System.currentTimeMillis() - t0);
 
         // build location index matching coordinate order
         Map<Location, Integer> locationIndex = new HashMap<>();
@@ -122,7 +131,28 @@ public class EVRPService implements EVRPSolverService {
         log.info("Solver: {} | Program: {}", gp.getClass().getSimpleName(), programFileName);
         Genotype<ProgramGene<Double>> genotype = programParserService.parse(programText);
 
-        List<Vehicle> usedVehicles = gp.getUsedVehicles(genotype);
+        @SuppressWarnings("resource")
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<List<Vehicle>> future = executor.submit(() -> gp.getUsedVehicles(genotype));
+        executor.shutdown();
+
+        long t1 = System.currentTimeMillis();
+        List<Vehicle> usedVehicles;
+        try {
+            usedVehicles = future.get(SOLVER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            log.info("Solver took {}ms", System.currentTimeMillis() - t1);
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            executor.shutdownNow();
+            throw new SolverTimeoutException("Solver did not find a solution within " + SOLVER_TIMEOUT_SECONDS + " seconds - check problem parameters");
+        } catch (ExecutionException e) {
+            if (e.getCause() instanceof SolverTimeoutException ste) throw ste;
+            if (e.getCause() instanceof RuntimeException re) throw re;
+            throw new RuntimeException(e.getCause());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new SolverTimeoutException("Solver was interrupted");
+        }
 
         List<RouteDTO> routes = usedVehicles.stream()
                 .map(vehicle -> {

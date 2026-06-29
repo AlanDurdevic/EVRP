@@ -57,7 +57,10 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		double fuelConsumptionRate = problem.getFuelConsumptionRate();
 		List<Customer> UC = initializeUC();
 		while (!UC.isEmpty() || vehicleSupplier.hasMoreVehicles()) {
-			Location destination = null;
+			if (Thread.interrupted()) {
+				throw new hr.fer.rest.exception.SolverTimeoutException("Solver timed out");
+			}
+			Location destination;
 			Vehicle v = vehicleSupplier.getVehicle();
 			Customer c = cs.selectCustomer(v, UC, problem, vehicleSupplier.getVehicles());
 			if (c == null) {
@@ -99,16 +102,16 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 			}
 
 			double fuelNeeded = fuelConsumptionRate * (problem.distance(v.getCurrentLocation(), destination));
-			if (destination instanceof Customer) {
+			if (destination instanceof Customer customerDest) {
 				fuelNeeded += fuelConsumptionRate
-						* problem.distance(destination, ((Customer) destination).getNearestChargingStation());
+						* problem.distance(destination, customerDest.getNearestChargingStation());
 			}
 			if (v.getFuelCapacityLeft() < fuelNeeded) {
 				ChargingStation chargingStation = chooseChargingStation(v, destination);
 				if (chargingStation == null) {
 					double fuel = fuelConsumptionRate * problem.distance(v.getCurrentLocation(), depot);
 					if (fuel > v.getFuelCapacityLeft()) {
-						chargingStation = ((Customer) v.getCurrentLocation()).getNearestChargingStation();
+						chargingStation = v.getCurrentLocation().getNearestChargingStation();
 					}
 					destination = depot;
 				}
@@ -179,12 +182,11 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		// charge
 		currentTime += (vehicleFuelTankCapacity - fuelLeft) * inverseRefuelingRate;
 		fuelLeft = vehicleFuelTankCapacity;
-		
+
 		// go to customer
 		double distanceC = problem.distance(currentLocation, customer);
 		currentTime += distanceC / averageVelocity;
 		fuelLeft -= distanceC * fuelConsumptionRate;
-		currentLocation = customer;
 		// wait if arrive early
 		if(currentTime < customer.getReadyTime()) {
 			currentTime = customer.getReadyTime();
@@ -197,14 +199,11 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		currentTime += distanceD / averageVelocity;
 		fuelLeft -= distanceD * fuelConsumptionRate;
 		
-		if(fuelLeft < 0) {
+		if (fuelLeft < 0) {
 			return false;
 		}
-		
-		if(currentTime > depot.getDueDate()) {
-			return false;
-		}
-		return true;
+
+		return currentTime <= depot.getDueDate();
 	}
 
 	// choose charging station before return depot
@@ -314,7 +313,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		fuelNeeded = distanceD * fuelConsumptionRate;
 		if (fuelNeeded > fuelLeft) {
 			// choose charging station
-			ChargingStation cs = ((Customer)currentLocation).getNearestChargingStation();
+			ChargingStation cs = currentLocation.getNearestChargingStation();
 			// go to charging station
 			double distanceCS = problem.distance(currentLocation, cs);
 			currentTime += distanceCS / averageVelocity;
@@ -323,18 +322,13 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 			
 			// charge
 			currentTime += (vehicleFuelTankCapacity - fuelLeft) * inverseRefuelingRate;
-			fuelLeft = vehicleFuelTankCapacity;
 		}
 
 		// return to depot
 		distanceD = problem.distance(currentLocation, depot);
 		currentTime += distanceD / averageVelocity;
-		fuelLeft -= distanceD * fuelConsumptionRate;
 
-		if (currentTime > depot.getDueDate()) {
-			return false;
-		}
-		return true;
+		return currentTime <= depot.getDueDate();
 	}
 
 	protected List<Vehicle> initializeVehicles(int LB) {
@@ -418,9 +412,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 	}
 
 	protected List<Customer> initializeUC() {
-		List<Customer> UC = new ArrayList<>();
-		UC.addAll(problem.getCustomers());
-		return UC;
+		return new ArrayList<>(problem.getCustomers());
 	}
 
 }
