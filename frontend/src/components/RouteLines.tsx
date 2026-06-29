@@ -30,21 +30,33 @@ function RouteLines() {
 
   return (
     <>
-      {routingResult.routes.map((route, index) => {
-        if (route.locations.every((loc) => loc.id === 'depot')) return null
-        if (!(routeVisibility[index] ?? true)) return null
+      {routingResult.routes.flatMap((route, routeIndex) => {
+        if (route.locations.every((loc) => loc.id === 'depot')) return []
+        if (!(routeVisibility[routeIndex] ?? true)) return []
+
+        const color = ROUTE_COLORS[routeIndex % ROUTE_COLORS.length]
+        const pathOptions = { color, weight: 3 }
+
+        if (route.polylines && route.polylines.length > 0) {
+          return route.locations.slice(0, -1).map((loc, i) => {
+            const segmentPolyline = route.polylines![i]
+
+            const pts: [number, number][] =
+              segmentPolyline && segmentPolyline.length > 0
+                ? segmentPolyline
+                : ([resolveCoords(loc.id), resolveCoords(route.locations[i + 1].id)].filter(
+                    Boolean,
+                  ) as [number, number][])
+
+            return <Polyline key={`${routeIndex}-${i}`} positions={pts} pathOptions={pathOptions} />
+          })
+        }
 
         const positions = route.locations
           .map((loc) => resolveCoords(loc.id))
           .filter((pos): pos is [number, number] => pos !== null)
 
-        return (
-          <Polyline
-            key={index}
-            positions={positions}
-            pathOptions={{ color: ROUTE_COLORS[index % ROUTE_COLORS.length], weight: 3 }}
-          />
-        )
+        return [<Polyline key={routeIndex} positions={positions} pathOptions={pathOptions} />]
       })}
     </>
   )

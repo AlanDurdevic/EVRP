@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useEVRPStore } from './lib/evrp-store'
-import { checkAuth } from './lib/auth-service'
+import { checkAuth, login } from './lib/auth-service'
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
 
@@ -11,6 +11,14 @@ function App() {
   const setCheckingAuth = useEVRPStore((s) => s.setCheckingAuth)
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      login('admin', 'changeme').finally(() => {
+        setAuthenticated(true)
+        setCheckingAuth(false)
+      })
+      return
+    }
+
     checkAuth().then((ok) => {
       setAuthenticated(ok)
       setCheckingAuth(false)

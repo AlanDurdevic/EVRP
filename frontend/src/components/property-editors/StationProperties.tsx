@@ -31,10 +31,8 @@ export function StationProperties() {
         <FieldRow label="X Coordinate">
           <Input
             type="number"
-            step="0.1"
-            min="0"
-            max="10"
-            value={station.x}
+            step="0.0001"
+            value={parseFloat(station.x.toFixed(4))}
             onChange={(e) => updateStation(station.id, { x: parseFloat(e.target.value) || 0 })}
             className="h-8 text-sm"
           />
@@ -42,10 +40,8 @@ export function StationProperties() {
         <FieldRow label="Y Coordinate">
           <Input
             type="number"
-            step="0.1"
-            min="0"
-            max="10"
-            value={station.y}
+            step="0.0001"
+            value={parseFloat(station.y.toFixed(4))}
             onChange={(e) => updateStation(station.id, { y: parseFloat(e.target.value) || 0 })}
             className="h-8 text-sm"
           />

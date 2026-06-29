@@ -24,10 +24,8 @@ export function DepotProperties() {
         <FieldRow label="X Coordinate">
           <Input
             type="number"
-            step="0.1"
-            min="0"
-            max="10"
-            value={problem.depot.x}
+            step="0.0001"
+            value={parseFloat(problem.depot.x.toFixed(4))}
             onChange={(e) => setDepot({ ...problem.depot, x: parseFloat(e.target.value) || 0 })}
             className="h-8 text-sm"
           />
@@ -35,10 +33,8 @@ export function DepotProperties() {
         <FieldRow label="Y Coordinate">
           <Input
             type="number"
-            step="0.1"
-            min="0"
-            max="10"
-            value={problem.depot.y}
+            step="0.0001"
+            value={parseFloat(problem.depot.y.toFixed(4))}
             onChange={(e) => setDepot({ ...problem.depot, y: parseFloat(e.target.value) || 0 })}
             className="h-8 text-sm"
           />

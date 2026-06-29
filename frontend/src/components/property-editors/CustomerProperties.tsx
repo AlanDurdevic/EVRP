@@ -31,10 +31,8 @@ export function CustomerProperties() {
         <FieldRow label="X Coordinate">
           <Input
             type="number"
-            step="0.1"
-            min="0"
-            max="10"
-            value={customer.x}
+            step="0.0001"
+            value={parseFloat(customer.x.toFixed(4))}
             onChange={(e) => updateCustomer(customer.id, { x: parseFloat(e.target.value) || 0 })}
             className="h-8 text-sm"
           />
@@ -42,10 +40,8 @@ export function CustomerProperties() {
         <FieldRow label="Y Coordinate">
           <Input
             type="number"
-            step="0.1"
-            min="0"
-            max="10"
-            value={customer.y}
+            step="0.0001"
+            value={parseFloat(customer.y.toFixed(4))}
             onChange={(e) => updateCustomer(customer.id, { y: parseFloat(e.target.value) || 0 })}
             className="h-8 text-sm"
           />
