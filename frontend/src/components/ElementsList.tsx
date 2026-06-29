@@ -1,9 +1,9 @@
+import { useState } from 'react'
 import { useEVRPStore } from '@/lib/evrp-store'
 import { Button } from './ui/button'
 import { ConfirmDialog } from './ConfirmDialog'
 import { cn } from '@/lib/utils'
 import { ChevronRight, Eye, EyeOff, MapPin, Route, Trash2, Users, Zap } from 'lucide-react'
-import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible'
 
 const ROUTE_COLORS = [
@@ -35,13 +35,24 @@ export const ElementsList = () => {
     routingResult,
     routeVisibility,
     toggleRouteVisible,
+    customersOpen,
+    stationsOpen,
+    routesOpen,
+    openRouteDetails,
+    setCustomersOpen,
+    setStationsOpen,
+    setRoutesOpen,
+    toggleRouteDetails,
   } = useEVRPStore()
   const [confirmClearCustomers, setConfirmClearCustomers] = useState(false)
   const [confirmClearStations, setConfirmClearStations] = useState(false)
   const [confirmRemoveDepot, setConfirmRemoveDepot] = useState(false)
-  const [customersOpen, setCustomersOpen] = useState(true)
-  const [stationsOpen, setStationsOpen] = useState(true)
-  const [routesOpen, setRoutesOpen] = useState(true)
+
+  function locationType(id: string): 'depot' | 'customer' | 'station' {
+    if (id === 'depot') return 'depot'
+    if (problem.customers.some((c) => c.id === id)) return 'customer'
+    return 'station'
+  }
 
   function select(type: 'depot' | 'customer' | 'station', id: string | null) {
     setSelection({ type, id })
@@ -246,32 +257,81 @@ export const ElementsList = () => {
                 const color = ROUTE_COLORS[index % ROUTE_COLORS.length]
                 const visible = routeVisibility[index] ?? true
                 const stopCount = route.locations.length
+                const isOpen = !!openRouteDetails[index]
 
                 return (
-                  <div
+                  <Collapsible
                     key={index}
-                    className="flex items-center gap-2 min-h-9 py-1 px-2 rounded-md hover:bg-accent transition-colors duration-150"
+                    open={isOpen}
+                    onOpenChange={() => toggleRouteDetails(index)}
                   >
-                    <div
-                      className="size-3 rounded-full shrink-0"
-                      style={{ backgroundColor: color }}
-                    />
-                    <Route className="size-4 text-muted-foreground shrink-0" />
-                    <div className="flex flex-col min-w-0 flex-1">
-                      <span className="text-sm leading-tight">Route {index + 1}</span>
-                      <span className="text-xs text-muted-foreground leading-tight">
-                        {stopCount} stop{stopCount !== 1 ? 's' : ''} ·{' '}
-                        {(route.totalDistanceMeters / 1000).toFixed(2)} km
-                      </span>
+                    <div className="flex items-center gap-2 min-h-9 py-1 px-2 rounded-md hover:bg-accent transition-colors duration-150">
+                      <div
+                        className="size-3 rounded-full shrink-0"
+                        style={{ backgroundColor: color }}
+                      />
+                      <Route className="size-4 text-muted-foreground shrink-0" />
+                      <CollapsibleTrigger className="flex items-center gap-1 flex-1 min-w-0 text-left cursor-pointer">
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span className="text-sm leading-tight">Route {index + 1}</span>
+                          <span className="text-xs text-muted-foreground leading-tight">
+                            {stopCount} stop{stopCount !== 1 ? 's' : ''} ·{' '}
+                            {(route.totalDistanceMeters / 1000).toFixed(2)} km
+                          </span>
+                        </div>
+                        <ChevronRight
+                          className={cn(
+                            'size-3 text-muted-foreground shrink-0 transition-transform duration-150',
+                            isOpen && 'rotate-90',
+                          )}
+                        />
+                      </CollapsibleTrigger>
+                      <button
+                        onClick={() => toggleRouteVisible(index)}
+                        className="p-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
+                        title={visible ? 'Hide route' : 'Show route'}
+                      >
+                        {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => toggleRouteVisible(index)}
-                      className="p-1 text-muted-foreground hover:text-foreground transition-colors cursor-pointer shrink-0"
-                      title={visible ? 'Hide route' : 'Show route'}
-                    >
-                      {visible ? <Eye className="size-4" /> : <EyeOff className="size-4" />}
-                    </button>
-                  </div>
+                    <CollapsibleContent className="ml-7 mt-1 mb-1 space-y-0.5">
+                      {route.locations.map((loc, i) => {
+                        const type = locationType(loc.id)
+                        const Icon = type === 'depot' ? MapPin : type === 'customer' ? Users : Zap
+                        const hoverClass =
+                          type === 'depot'
+                            ? 'hover:bg-depot/20 hover:text-depot'
+                            : type === 'customer'
+                              ? 'hover:bg-customer/20 hover:text-customer'
+                              : 'hover:bg-station/20 hover:text-station'
+                        const activeClass =
+                          selection.id === loc.id
+                            ? type === 'depot'
+                              ? 'bg-depot/20 text-depot'
+                              : type === 'customer'
+                                ? 'bg-customer/20 text-customer'
+                                : 'bg-station/20 text-station'
+                            : ''
+                        return (
+                          <Button
+                            key={i}
+                            variant="ghost"
+                            className={cn(
+                              'w-full justify-start gap-2 h-8 transition-colors duration-150',
+                              hoverClass,
+                              activeClass,
+                            )}
+                            onClick={() => select(type, loc.id)}
+                            onMouseEnter={() => setHoveredId(loc.id)}
+                            onMouseLeave={() => setHoveredId(null)}
+                          >
+                            <Icon className="size-4 shrink-0" />
+                            <span>{loc.id}</span>
+                          </Button>
+                        )
+                      })}
+                    </CollapsibleContent>
+                  </Collapsible>
                 )
               })}
             </CollapsibleContent>

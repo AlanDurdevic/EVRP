@@ -50,6 +50,10 @@ interface EVRPStore {
   mapBounds: { minX: number; maxX: number; minY: number; maxY: number }
   customersVisible: boolean
   stationsVisible: boolean
+  customersOpen: boolean
+  stationsOpen: boolean
+  routesOpen: boolean
+  openRouteDetails: Record<number, boolean>
 
   setSelection: (selection: Selection) => void
   clearSelection: () => void
@@ -58,6 +62,10 @@ interface EVRPStore {
   setHoveredId: (id: string | null) => void
   toggleCustomersVisible: () => void
   toggleStationsVisible: () => void
+  setCustomersOpen: (v: boolean) => void
+  setStationsOpen: (v: boolean) => void
+  setRoutesOpen: (v: boolean) => void
+  toggleRouteDetails: (index: number) => void
 
   // --- Routing ---
   optimizationTarget: OptimizationTarget
@@ -216,6 +224,10 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   mapBounds: { minX: 0, maxX: 10, minY: 0, maxY: 10 },
   customersVisible: true,
   stationsVisible: true,
+  customersOpen: true,
+  stationsOpen: true,
+  routesOpen: true,
+  openRouteDetails: {},
 
   setSelection: (selection) => set({ selection }),
   clearSelection: () => set({ selection: { type: null, id: null } }),
@@ -224,6 +236,13 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   setHoveredId: (id) => set({ hoveredId: id }),
   toggleCustomersVisible: () => set((s) => ({ customersVisible: !s.customersVisible })),
   toggleStationsVisible: () => set((s) => ({ stationsVisible: !s.stationsVisible })),
+  setCustomersOpen: (v) => set({ customersOpen: v }),
+  setStationsOpen: (v) => set({ stationsOpen: v }),
+  setRoutesOpen: (v) => set({ routesOpen: v }),
+  toggleRouteDetails: (index) =>
+    set((s) => ({
+      openRouteDetails: { ...s.openRouteDetails, [index]: !s.openRouteDetails[index] },
+    })),
 
   // --- Routing ---
   optimizationTarget: 'energy' as OptimizationTarget,
@@ -233,7 +252,8 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
 
   setOptimizationTarget: (target) => set({ optimizationTarget: target }),
   setVehicleMethod: (method) => set({ vehicleMethod: method }),
-  setRoutingResult: (result) => set({ routingResult: result, routeVisibility: {} }),
+  setRoutingResult: (result) =>
+    set({ routingResult: result, routeVisibility: {}, openRouteDetails: {} }),
   toggleRouteVisible: (index) =>
     set((s) => ({
       routeVisibility: { ...s.routeVisibility, [index]: !(s.routeVisibility[index] ?? true) },
