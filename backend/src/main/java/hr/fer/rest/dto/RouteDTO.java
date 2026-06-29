@@ -10,4 +10,5 @@ import java.util.List;
 public class RouteDTO {
     private List<LocationDTO> locations;
     private List<List<double[]>> polylines;
+    private double totalDistanceMeters;
 }

@@ -1,9 +1,9 @@
 import { useEVRPStore } from '@/lib/evrp-store'
 import { Trash2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { FieldRow } from '../FieldRow'
+import { NumericInput } from '../NumericInput'
 
 export function CustomerProperties() {
   const { problem, selection, updateCustomer, removeCustomer } = useEVRPStore()
@@ -29,69 +29,57 @@ export function CustomerProperties() {
       </div>
       <div className="space-y-3">
         <FieldRow label="X Coordinate">
-          <Input
-            type="number"
+          <NumericInput
             step="0.0001"
-            value={parseFloat(customer.x.toFixed(4))}
-            onChange={(e) => updateCustomer(customer.id, { x: parseFloat(e.target.value) || 0 })}
+            decimals={4}
+            value={customer.x}
+            onChange={(x) => updateCustomer(customer.id, { x })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Y Coordinate">
-          <Input
-            type="number"
+          <NumericInput
             step="0.0001"
-            value={parseFloat(customer.y.toFixed(4))}
-            onChange={(e) => updateCustomer(customer.id, { y: parseFloat(e.target.value) || 0 })}
+            decimals={4}
+            value={customer.y}
+            onChange={(y) => updateCustomer(customer.id, { y })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <Separator />
         <FieldRow label="Demand">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={customer.demand}
-            onChange={(e) =>
-              updateCustomer(customer.id, { demand: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(demand) => updateCustomer(customer.id, { demand })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Ready Time">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={customer.readyTime}
-            onChange={(e) =>
-              updateCustomer(customer.id, { readyTime: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(readyTime) => updateCustomer(customer.id, { readyTime })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Due Date">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={customer.dueDate}
-            onChange={(e) =>
-              updateCustomer(customer.id, { dueDate: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(dueDate) => updateCustomer(customer.id, { dueDate })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Service Time">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={customer.serviceTime}
-            onChange={(e) =>
-              updateCustomer(customer.id, { serviceTime: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(serviceTime) => updateCustomer(customer.id, { serviceTime })}
             className="h-8 text-sm"
           />
         </FieldRow>

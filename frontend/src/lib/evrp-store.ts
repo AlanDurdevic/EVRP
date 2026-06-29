@@ -74,11 +74,11 @@ interface EVRPStore {
 const initialProblem: EVRPProblem = {
   depot: { x: 0, y: 0, id: 'depot' },
   problemProperties: {
-    vehicleFuelTankCapacity: 50.0,
-    vehicleLoadCapacity: 10.0,
-    fuelConsumptionRate: 0.5,
-    inverseRefuelingRate: 0.2,
-    averageVelocity: 40.0,
+    vehicleFuelTankCapacity: 15000,
+    vehicleLoadCapacity: 10,
+    fuelConsumptionRate: 1,
+    inverseRefuelingRate: 0.0001,
+    averageVelocity: 60,
   },
   customers: [],
   chargingStations: [],

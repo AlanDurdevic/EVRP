@@ -12,6 +12,7 @@ interface RouteLocation {
 export interface Route {
   locations: RouteLocation[]
   polylines: ([number, number][] | null)[] | null
+  totalDistanceMeters: number
 }
 
 export interface RoutingResult {

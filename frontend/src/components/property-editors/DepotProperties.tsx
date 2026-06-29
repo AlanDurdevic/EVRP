@@ -2,6 +2,7 @@ import { useEVRPStore } from '@/lib/evrp-store'
 import { MapPin } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { FieldRow } from '@/components/FieldRow'
+import { NumericInput } from '@/components/NumericInput'
 
 export function DepotProperties() {
   const { problem, setDepot } = useEVRPStore()
@@ -22,20 +23,20 @@ export function DepotProperties() {
           />
         </FieldRow>
         <FieldRow label="X Coordinate">
-          <Input
-            type="number"
+          <NumericInput
             step="0.0001"
-            value={parseFloat(problem.depot.x.toFixed(4))}
-            onChange={(e) => setDepot({ ...problem.depot, x: parseFloat(e.target.value) || 0 })}
+            decimals={4}
+            value={problem.depot.x}
+            onChange={(x) => setDepot({ ...problem.depot, x })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Y Coordinate">
-          <Input
-            type="number"
+          <NumericInput
             step="0.0001"
-            value={parseFloat(problem.depot.y.toFixed(4))}
-            onChange={(e) => setDepot({ ...problem.depot, y: parseFloat(e.target.value) || 0 })}
+            decimals={4}
+            value={problem.depot.y}
+            onChange={(y) => setDepot({ ...problem.depot, y })}
             className="h-8 text-sm"
           />
         </FieldRow>

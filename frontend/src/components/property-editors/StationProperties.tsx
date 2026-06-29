@@ -1,9 +1,9 @@
 import { Trash2, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { FieldRow } from '@/components/FieldRow'
-import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
 import { useEVRPStore } from '@/lib/evrp-store'
+import { NumericInput } from '@/components/NumericInput'
 
 export function StationProperties() {
   const { problem, selection, updateStation, removeStation } = useEVRPStore()
@@ -29,33 +29,30 @@ export function StationProperties() {
       </div>
       <div className="space-y-3">
         <FieldRow label="X Coordinate">
-          <Input
-            type="number"
+          <NumericInput
             step="0.0001"
-            value={parseFloat(station.x.toFixed(4))}
-            onChange={(e) => updateStation(station.id, { x: parseFloat(e.target.value) || 0 })}
+            decimals={4}
+            value={station.x}
+            onChange={(x) => updateStation(station.id, { x })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Y Coordinate">
-          <Input
-            type="number"
+          <NumericInput
             step="0.0001"
-            value={parseFloat(station.y.toFixed(4))}
-            onChange={(e) => updateStation(station.id, { y: parseFloat(e.target.value) || 0 })}
+            decimals={4}
+            value={station.y}
+            onChange={(y) => updateStation(station.id, { y })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <Separator />
         <FieldRow label="Due Date">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={station.dueDate}
-            onChange={(e) =>
-              updateStation(station.id, { dueDate: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(dueDate) => updateStation(station.id, { dueDate })}
             className="h-8 text-sm"
           />
         </FieldRow>

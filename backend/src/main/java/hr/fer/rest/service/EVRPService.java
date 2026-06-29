@@ -159,10 +159,16 @@ public class EVRPService implements EVRPSolverService {
                     List<Location> route = vehicle.getRoute();
                     List<LocationDTO> locations = evrpMapper.toLocationDtoList(route);
                     List<List<double[]>> polylines = new ArrayList<>();
+                    double totalDistance = 0;
                     for (int i = 0; i < route.size() - 1; i++) {
                         polylines.add(polylineService.fetchPolyline(route.get(i), route.get(i + 1)));
+                        Integer from = locationIndex.get(route.get(i));
+                        Integer to = locationIndex.get(route.get(i + 1));
+                        if (from != null && to != null) {
+                            totalDistance += distanceMatrix[from][to];
+                        }
                     }
-                    return new RouteDTO(locations, polylines);
+                    return new RouteDTO(locations, polylines, totalDistance);
                 })
                 .toList();
 

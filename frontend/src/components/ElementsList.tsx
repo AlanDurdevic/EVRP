@@ -259,7 +259,8 @@ export const ElementsList = () => {
                     <Route className="size-4 text-muted-foreground shrink-0" />
                     <span className="text-sm">Route {index + 1}</span>
                     <span className="ml-auto text-xs text-muted-foreground shrink-0">
-                      {stopCount} stop{stopCount !== 1 ? 's' : ''}
+                      {stopCount} stop{stopCount !== 1 ? 's' : ''} ·{' '}
+                      {(route.totalDistanceMeters / 1000).toFixed(2)} km
                     </span>
                     <button
                       onClick={() => toggleRouteVisible(index)}

@@ -1,7 +1,7 @@
 import { useEVRPStore } from '@/lib/evrp-store'
 import { Settings } from 'lucide-react'
 import { FieldRow } from './FieldRow'
-import { Input } from './ui/input'
+import { NumericInput } from './NumericInput'
 
 export function VehicleProperties() {
   const { problem, updateProblemProperties } = useEVRPStore()
@@ -15,62 +15,49 @@ export function VehicleProperties() {
       </div>
       <div className="space-y-3">
         <FieldRow label="Fuel Tank Capacity">
-          <Input
-            type="number"
+          <NumericInput
             step="1"
             min="0"
             value={props.vehicleFuelTankCapacity}
-            onChange={(e) =>
-              updateProblemProperties({ vehicleFuelTankCapacity: parseFloat(e.target.value) || 0 })
+            onChange={(vehicleFuelTankCapacity) =>
+              updateProblemProperties({ vehicleFuelTankCapacity })
             }
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Load Capacity">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={props.vehicleLoadCapacity}
-            onChange={(e) =>
-              updateProblemProperties({ vehicleLoadCapacity: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(vehicleLoadCapacity) => updateProblemProperties({ vehicleLoadCapacity })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Fuel Consumption">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={props.fuelConsumptionRate}
-            onChange={(e) =>
-              updateProblemProperties({ fuelConsumptionRate: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(fuelConsumptionRate) => updateProblemProperties({ fuelConsumptionRate })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Refueling Rate">
-          <Input
-            type="number"
+          <NumericInput
             step="0.1"
             min="0"
             value={props.inverseRefuelingRate}
-            onChange={(e) =>
-              updateProblemProperties({ inverseRefuelingRate: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(inverseRefuelingRate) => updateProblemProperties({ inverseRefuelingRate })}
             className="h-8 text-sm"
           />
         </FieldRow>
         <FieldRow label="Avg Velocity">
-          <Input
-            type="number"
+          <NumericInput
             step="1"
             min="0"
             value={props.averageVelocity}
-            onChange={(e) =>
-              updateProblemProperties({ averageVelocity: parseFloat(e.target.value) || 0 })
-            }
+            onChange={(averageVelocity) => updateProblemProperties({ averageVelocity })}
             className="h-8 text-sm"
           />
         </FieldRow>
