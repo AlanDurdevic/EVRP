@@ -37,15 +37,15 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 				destination = depot;
 			}
 
-			double fuelNeeded = fuelConsumptionRate * (Location.distance(v.getCurrentLocation(), destination));
+			double fuelNeeded = fuelConsumptionRate * (problem.distance(v.getCurrentLocation(), destination));
 			if (destination instanceof Customer) {
 				fuelNeeded += fuelConsumptionRate
-						* Location.distance(destination, ((Customer) destination).getNearestChargingStation());
+						* problem.distance(destination, ((Customer) destination).getNearestChargingStation());
 			}
 			if (v.getFuelCapacityLeft() < fuelNeeded) {
 				ChargingStation chargingStation = chooseChargingStation(v, destination);
 				if (chargingStation == null) {
-					double fuel = fuelConsumptionRate * Location.distance(v.getCurrentLocation(), depot);
+					double fuel = fuelConsumptionRate * problem.distance(v.getCurrentLocation(), depot);
 					if (fuel > v.getFuelCapacityLeft()) {
 						chargingStation = chooseChargingStation(v, depot);
 					}
@@ -58,7 +58,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 			}
 			// travel to destination
 			double velocity = velocityDistribution.generate(averageVelocity);
-			double distance = Location.distance(v.getCurrentLocation(), destination);
+			double distance = problem.distance(v.getCurrentLocation(), destination);
 			double time = distance / velocity;
 			v.addTime(time);
 			double fuel = fuelConsumptionRate * distance;
@@ -81,7 +81,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 				} else {
 					v.addLocation(new Customer((Customer) destination, 0, 0));
 					// check if can return to depot
-					distance = Location.distance(destination, depot);
+					distance = problem.distance(destination, depot);
 					fuelNeeded = distance * fuelConsumptionRate;
 					if (fuelNeeded > v.getFuelCapacityLeft()) {
 						charge(v, chooseChargingStation(v, depot));
@@ -90,7 +90,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 					destination = depot;
 					// return to depot
 					velocity = velocityDistribution.generate(averageVelocity);
-					distance = Location.distance(v.getCurrentLocation(), destination);
+					distance = problem.distance(v.getCurrentLocation(), destination);
 					time = distance / velocity;
 					v.addTime(time);
 					fuel = fuelConsumptionRate * distance;
@@ -124,7 +124,7 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		Distribution velocityDistribution = ((StohasticEVRPProblem) problem).getVelocityDistribution();
 		// travel to charging station
 		double velocity = velocityDistribution.generate(problem.getAverageVelocity());
-		double distance = Location.distance(v.getCurrentLocation(), chargingStation);
+		double distance = problem.distance(v.getCurrentLocation(), chargingStation);
 		double time = distance / velocity;
 		v.addTime(time);
 		double fuel = problem.getFuelConsumptionRate() * distance;
@@ -149,16 +149,16 @@ public abstract class StohasticSolutionEVRP<T extends Gene<?, T>> extends Soluti
 		double bestEnergy = Double.MAX_VALUE;
 		for (ChargingStation cs : problem.getChargingStations()) {
 			double fuelCapacityLeft = v.getFuelCapacityLeft();
-			double distanceLCS = Location.distance(currentLocation, cs);
+			double distanceLCS = problem.distance(currentLocation, cs);
 			double fuelLCS = fuelConsumptionRate * distanceLCS;
 			fuelCapacityLeft -= fuelLCS;
 			// check if vehicle can reach charging station
 			if (fuelCapacityLeft >= 0) {
 				// get to destination from charging station
-				double distanceCSD = Location.distance(cs, destination);
+				double distanceCSD = problem.distance(cs, destination);
 				// check if vehicle can reach destination and nearest charging station
 				double fuelNeeded = fuelConsumptionRate
-						* (distanceCSD + Location.distance(destination, destination.getNearestChargingStation()));
+						* (distanceCSD + problem.distance(destination, destination.getNearestChargingStation()));
 				if (fuelNeeded <= vehicleFullTankCapacity) {
 					double energy = fuelConsumptionRate * (distanceLCS + distanceCSD);
 					if (energy < bestEnergy) {

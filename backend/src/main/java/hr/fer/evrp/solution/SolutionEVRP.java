@@ -38,7 +38,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 			List<Location> route = vehicle.getRoute();
 			List<State> states = vehicle.getState();
 			for (int i = 0; i < route.size() - 1; i++) {
-				distance += Location.distance(route.get(i), route.get(i + 1));
+				distance += problem.distance(route.get(i), route.get(i + 1));
 				double diff = states.get(i + 1).getCurrentTime() - route.get(i + 1).getDueDate();
 				if(diff > 0) {
 					latency += diff;
@@ -64,7 +64,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 				destination = depot;
 			} else {
 				if (v.getLoadCapacityLeft() >= c.getDemand()) {
-					double timeNeeded = Location.distance(v.getCurrentLocation(), c) / averageVelocity;
+					double timeNeeded = problem.distance(v.getCurrentLocation(), c) / averageVelocity;
 					if (v.getCurrentTime() + timeNeeded <= c.getDueDate()) {
 						destination = c;
 					} else {
@@ -80,7 +80,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 					// choose charging station
 					charge(v, chooseChargingStationBeforeDepot(v, c));
 					// go to customer
-					double distance = Location.distance(v.getCurrentLocation(), destination);
+					double distance = problem.distance(v.getCurrentLocation(), destination);
 					double time = distance / averageVelocity;
 					v.addTime(time);
 					double fuel = fuelConsumptionRate * distance;
@@ -98,15 +98,15 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 				destination = depot;
 			}
 
-			double fuelNeeded = fuelConsumptionRate * (Location.distance(v.getCurrentLocation(), destination));
+			double fuelNeeded = fuelConsumptionRate * (problem.distance(v.getCurrentLocation(), destination));
 			if (destination instanceof Customer) {
 				fuelNeeded += fuelConsumptionRate
-						* Location.distance(destination, ((Customer) destination).getNearestChargingStation());
+						* problem.distance(destination, ((Customer) destination).getNearestChargingStation());
 			}
 			if (v.getFuelCapacityLeft() < fuelNeeded) {
 				ChargingStation chargingStation = chooseChargingStation(v, destination);
 				if (chargingStation == null) {
-					double fuel = fuelConsumptionRate * Location.distance(v.getCurrentLocation(), depot);
+					double fuel = fuelConsumptionRate * problem.distance(v.getCurrentLocation(), depot);
 					if (fuel > v.getFuelCapacityLeft()) {
 						chargingStation = ((Customer) v.getCurrentLocation()).getNearestChargingStation();
 					}
@@ -118,7 +118,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 
 			}
 			// travel to destination
-			double distance = Location.distance(v.getCurrentLocation(), destination);
+			double distance = problem.distance(v.getCurrentLocation(), destination);
 			double time = distance / averageVelocity;
 			v.addTime(time);
 			double fuel = fuelConsumptionRate * distance;
@@ -171,7 +171,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		}
 		
 		// go to charging station
-		double distanceCS = Location.distance(currentLocation, cs);
+		double distanceCS = problem.distance(currentLocation, cs);
 		fuelLeft -= fuelConsumptionRate*distanceCS;
 		currentTime += distanceCS / averageVelocity;
 		currentLocation = cs;
@@ -181,7 +181,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		fuelLeft = vehicleFuelTankCapacity;
 		
 		// go to customer
-		double distanceC = Location.distance(currentLocation, customer);
+		double distanceC = problem.distance(currentLocation, customer);
 		currentTime += distanceC / averageVelocity;
 		fuelLeft -= distanceC * fuelConsumptionRate;
 		currentLocation = customer;
@@ -193,7 +193,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		currentTime += customer.getServiceTime();
 		
 		// return to depot
-		double distanceD = Location.distance(customer, depot);
+		double distanceD = problem.distance(customer, depot);
 		currentTime += distanceD / averageVelocity;
 		fuelLeft -= distanceD * fuelConsumptionRate;
 		
@@ -220,7 +220,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		double bestEnergy = Double.MAX_VALUE;
 		for (ChargingStation cs : problem.getChargingStations()) {
 			double fuelCapacityLeft = v.getFuelCapacityLeft();
-			double distanceLCS = Location.distance(currentLocation, cs);
+			double distanceLCS = problem.distance(currentLocation, cs);
 			double fuelLCS = fuelConsumptionRate * distanceLCS;
 			fuelCapacityLeft -= fuelLCS;
 			// check if vehicle can reach charging station
@@ -230,11 +230,11 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 				// charge vehicle
 				time += (vehicleFullTankCapacity - fuelCapacityLeft) * inverseRefuelingRate;
 				// get to destination from charging station
-				double distanceCSD = Location.distance(cs, destination);
+				double distanceCSD = problem.distance(cs, destination);
 				time += distanceCSD / averageVelocity;
 				// check if vehicle can reach destination and depot
 				double fuelNeeded = fuelConsumptionRate
-						* (distanceCSD + Location.distance(destination, depot));
+						* (distanceCSD + problem.distance(destination, depot));
 				if (fuelNeeded <= vehicleFullTankCapacity) {
 					// check time
 					if (time + v.getCurrentTime() <= destination.getDueDate()) {
@@ -248,7 +248,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 						// serve customer
 						time += destination.getServiceTime();
 						// return to depot
-						double distanceD = Location.distance(destination, depot);
+						double distanceD = problem.distance(destination, depot);
 						time += distanceD / averageVelocity;
 						if(time < depot.getDueDate()) {
 							double energy = fuelConsumptionRate * (distanceLCS + distanceCSD);
@@ -277,9 +277,9 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		double fuelLeft = v.getFuelCapacityLeft();
 
 		// has enough fuel to visit customer and nearest charging station
-		double fuelNeeded = fuelConsumptionRate * (Location.distance(currentLocation, customer));
+		double fuelNeeded = fuelConsumptionRate * (problem.distance(currentLocation, customer));
 		fuelNeeded += fuelConsumptionRate
-				* Location.distance(customer, customer.getNearestChargingStation());
+				* problem.distance(customer, customer.getNearestChargingStation());
 		if (fuelLeft < fuelNeeded) {
 			// choose charging station
 			ChargingStation cs = chooseChargingStation(v, customer);
@@ -287,7 +287,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 				return false;
 			}
 			// go to charging station
-			double distanceCS = Location.distance(currentLocation, cs);
+			double distanceCS = problem.distance(currentLocation, cs);
 			currentTime += distanceCS / averageVelocity;
 			fuelLeft -= distanceCS * fuelConsumptionRate;
 			currentLocation = cs;
@@ -298,7 +298,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		}
 
 		// go to customer
-		double distanceC = Location.distance(currentLocation, customer);
+		double distanceC = problem.distance(currentLocation, customer);
 		currentTime += distanceC / averageVelocity;
 		fuelLeft -= distanceC * fuelConsumptionRate;
 		currentLocation = customer;
@@ -310,13 +310,13 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		currentTime += currentLocation.getServiceTime();
 
 		// check if can reach depot (enough fuel)
-		double distanceD = Location.distance(currentLocation, depot);
+		double distanceD = problem.distance(currentLocation, depot);
 		fuelNeeded = distanceD * fuelConsumptionRate;
 		if (fuelNeeded > fuelLeft) {
 			// choose charging station
 			ChargingStation cs = ((Customer)currentLocation).getNearestChargingStation();
 			// go to charging station
-			double distanceCS = Location.distance(currentLocation, cs);
+			double distanceCS = problem.distance(currentLocation, cs);
 			currentTime += distanceCS / averageVelocity;
 			fuelLeft -= distanceCS * fuelConsumptionRate;
 			currentLocation = cs;
@@ -327,7 +327,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		}
 
 		// return to depot
-		distanceD = Location.distance(currentLocation, depot);
+		distanceD = problem.distance(currentLocation, depot);
 		currentTime += distanceD / averageVelocity;
 		fuelLeft -= distanceD * fuelConsumptionRate;
 
@@ -359,7 +359,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 
 	protected void charge(Vehicle v, ChargingStation chargingStation) {
 		// travel to charging station
-		double distance = Location.distance(v.getCurrentLocation(), chargingStation);
+		double distance = problem.distance(v.getCurrentLocation(), chargingStation);
 		double time = distance / problem.getAverageVelocity();
 		v.addTime(time);
 		double fuel = problem.getFuelConsumptionRate() * distance;
@@ -387,7 +387,7 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 		double bestEnergy = Double.MAX_VALUE;
 		for (ChargingStation cs : problem.getChargingStations()) {
 			double fuelCapacityLeft = v.getFuelCapacityLeft();
-			double distanceLCS = Location.distance(currentLocation, cs);
+			double distanceLCS = problem.distance(currentLocation, cs);
 			double fuelLCS = fuelConsumptionRate * distanceLCS;
 			fuelCapacityLeft -= fuelLCS;
 			// check if vehicle can reach charging station
@@ -397,11 +397,11 @@ public abstract class SolutionEVRP<T extends Gene<?, T>> {
 				// charge vehicle
 				time += (vehicleFullTankCapacity - fuelCapacityLeft) * inverseRefuelingRate;
 				// get to destination from charging station
-				double distanceCSD = Location.distance(cs, destination);
+				double distanceCSD = problem.distance(cs, destination);
 				time += distanceCSD / averageVelocity;
 				// check if vehicle can reach destination and nearest charging station
 				double fuelNeeded = fuelConsumptionRate
-						* (distanceCSD + Location.distance(destination, destination.getNearestChargingStation()));
+						* (distanceCSD + problem.distance(destination, destination.getNearestChargingStation()));
 				if (fuelNeeded <= vehicleFullTankCapacity) {
 					// check time
 					if (time + v.getCurrentTime() <= destination.getDueDate()) {

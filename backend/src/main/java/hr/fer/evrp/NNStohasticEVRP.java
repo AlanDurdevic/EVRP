@@ -209,7 +209,7 @@ public class NNStohasticEVRP {
 		}
 
 		return new StohasticEVRPProblem(depot, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations, demandDistribution, serviceTimeDistribution, velocityDistribution);
+				inverseRefuelingRate, averageVelocity, customers, chargingStations, null, null, demandDistribution, serviceTimeDistribution, velocityDistribution);
 	}
 	
 	private static int getLUNumberOfVehicles(StohasticEVRPProblem problem) {

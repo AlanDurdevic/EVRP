@@ -331,7 +331,7 @@ public class StohasticPipeline {
 
 		return new StohasticEVRPProblem(depot, vehicleFuelTankCapacity, vehicleLoadCapacity,
 				fuelConsumptionRate, inverseRefuelingRate, averageVelocity, customers, chargingStations,
-				demandDistribution, serviceDistribution, velocityDistribution);
+				null, null, demandDistribution, serviceDistribution, velocityDistribution);
 	}
 
 	private static StohasticEVRPProblem generateProblemTrain(String filename, int repIdx) {
@@ -431,7 +431,7 @@ public class StohasticPipeline {
 
 		return new StohasticEVRPProblem(depot, vehicleFuelTankCapacity, vehicleLoadCapacity,
 				fuelConsumptionRate, inverseRefuelingRate, averageVelocity, customers, chargingStations,
-				demandDistribution, serviceTimeDistribution, velocityDistribution);
+				null, null, demandDistribution, serviceTimeDistribution, velocityDistribution);
 	}
 	
 	private static long mixSeed(long baseSeed, String fileName, int repIdx) {

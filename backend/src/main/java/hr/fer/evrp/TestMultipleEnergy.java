@@ -202,7 +202,7 @@ public class TestMultipleEnergy {
 		}
 		
 		return new EVRPProblem(depot, vehicleFuelTankCapacity, vehicleLoadCapacity, fuelConsumptionRate,
-				inverseRefuelingRate, averageVelocity, customers, chargingStations);
+				inverseRefuelingRate, averageVelocity, customers, chargingStations, null, null);
 	}
 
 }

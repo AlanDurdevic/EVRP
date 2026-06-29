@@ -31,9 +31,9 @@ public class GPCustomerSelector implements CustomerSelector{
 		Location currentLocation = vehicle.getCurrentLocation();
 		if (currentLocation instanceof Customer) {
 			ERPpvk = fuelConsumptionRate
-					* Location.distance(((Customer) currentLocation).getNearestChargingStation(), currentLocation);
+					* problem.distance(((Customer) currentLocation).getNearestChargingStation(), currentLocation);
 		}
-		double EDeppvk = fuelConsumptionRate * Location.distance(currentLocation, problem.getDepot());
+		double EDeppvk = fuelConsumptionRate * problem.distance(currentLocation, problem.getDepot());
 
 		double centroidX = 0;
 		double centroidY = 0;
@@ -47,7 +47,7 @@ public class GPCustomerSelector implements CustomerSelector{
 		Customer bestCustomer = UC.getFirst();
 		double bestPriority = Double.MIN_VALUE;
 		for (Customer customer : UC) {
-			double distance = Location.distance(currentLocation, customer);
+			double distance = problem.distance(currentLocation, customer);
 			double Eni = fuelConsumptionRate * distance;
 			double Dni = customer.getDemand();
 			double DDni = customer.getDueDate();
@@ -55,8 +55,8 @@ public class GPCustomerSelector implements CustomerSelector{
 			double RTni = customer.getReadyTime();
 			double ECni = fuelConsumptionRate
 					* Math.sqrt(Math.pow(centroidX - customer.getX(), 2) + Math.pow(centroidY - customer.getY(), 2));
-			double ERPni = fuelConsumptionRate * Location.distance(customer, customer.getNearestChargingStation());
-			double EDepni = fuelConsumptionRate * Location.distance(customer, problem.getDepot());
+			double ERPni = fuelConsumptionRate * problem.distance(customer, customer.getNearestChargingStation());
+			double EDepni = fuelConsumptionRate * problem.distance(customer, problem.getDepot());
 
 			Double[] arguments = { Eni, Dni, DDni, STni, RTni, Evk, Cvk, Tvk, ECni, ERPni, EDepni, ERPpvk, EDeppvk };
 			double customerPriority = program.apply(arguments);

@@ -15,9 +15,9 @@ public class NNCustomerSelector implements CustomerSelector{
 			return null;
 		Location currentLocation = v.getCurrentLocation();
 		Customer nearestCustomer = UC.getFirst();
-		double closestDistance = Location.distance(currentLocation, nearestCustomer);
+		double closestDistance = problem.distance(currentLocation, nearestCustomer);
 		for(Customer customer : UC) {
-			double newDistance = Location.distance(currentLocation, customer);
+			double newDistance = problem.distance(currentLocation, customer);
 			if(newDistance < closestDistance) {
 				closestDistance = newDistance;
 				nearestCustomer = customer;

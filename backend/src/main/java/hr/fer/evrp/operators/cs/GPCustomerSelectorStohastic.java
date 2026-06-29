@@ -60,9 +60,9 @@ public class GPCustomerSelectorStohastic implements CustomerSelector {
 		Location currentLocation = vehicle.getCurrentLocation();
 		if (currentLocation instanceof Customer) {
 			ERPpvk = fuelConsumptionRate
-					* Location.distance(((Customer) currentLocation).getNearestChargingStation(), currentLocation);
+					* problem.distance(((Customer) currentLocation).getNearestChargingStation(), currentLocation);
 		}
-		double EDeppvk = fuelConsumptionRate * Location.distance(currentLocation, problem.getDepot());
+		double EDeppvk = fuelConsumptionRate * problem.distance(currentLocation, problem.getDepot());
 
 		double centroidX = 0;
 		double centroidY = 0;
@@ -86,8 +86,8 @@ public class GPCustomerSelectorStohastic implements CustomerSelector {
 				double RTni = customer.getReadyTime();
 				double ECni = fuelConsumptionRate * Math
 						.sqrt(Math.pow(centroidX - customer.getX(), 2) + Math.pow(centroidY - customer.getY(), 2));
-				double ERPni = fuelConsumptionRate * Location.distance(customer, customer.getNearestChargingStation());
-				double EDepni = fuelConsumptionRate * Location.distance(customer, problem.getDepot());
+				double ERPni = fuelConsumptionRate * problem.distance(customer, customer.getNearestChargingStation());
+				double EDepni = fuelConsumptionRate * problem.distance(customer, problem.getDepot());
 				double Var_Dni = problem.getDemandDistribution().getCV();
 				double Var_Sni = problem.getServiceTimeDistribution().getCV();
 				double Var_Tij = problem.getVelocityDistribution().getCV();
@@ -97,7 +97,7 @@ public class GPCustomerSelectorStohastic implements CustomerSelector {
 				List<VehicleETA> etas = new ArrayList<>();
 				for(Vehicle v : otherVehicles) {
 					double newVelocity = problem.getVelocityDistribution().generate(problem.getAverageVelocity());
-					double newEta = Location.distance(v.getCurrentLocation(), customer) / newVelocity;
+					double newEta = problem.distance(v.getCurrentLocation(), customer) / newVelocity;
 					etas.add(new VehicleETA(v, newEta));
 				}
 				etas.sort(Comparator.comparingDouble(VehicleETA::eta));
@@ -151,19 +151,19 @@ public class GPCustomerSelectorStohastic implements CustomerSelector {
 		Location destination = customer;
 		double time = 0;
 		
-		double fuelNeeded = fuelConsumptionRate * (Location.distance(currentLocation, customer));
-		fuelNeeded += fuelConsumptionRate * Location.distance(customer, customer.getNearestChargingStation());
+		double fuelNeeded = fuelConsumptionRate * (problem.distance(currentLocation, customer));
+		fuelNeeded += fuelConsumptionRate * problem.distance(customer, customer.getNearestChargingStation());
 		if (vehicle.getFuelCapacityLeft() < fuelNeeded) {
 			ChargingStation chargingStation = chooseChargingStation(vehicle, customer, problem);
 			if (chargingStation == null) {
-				double fuel = fuelConsumptionRate * Location.distance(currentLocation, depot);
+				double fuel = fuelConsumptionRate * problem.distance(currentLocation, depot);
 				if (fuel > vehicle.getFuelCapacityLeft()) {
 					chargingStation = chooseChargingStation(vehicle, depot, problem);
 				}
 				destination = depot;
 			}
 			if (chargingStation != null) {
-				double distance = Location.distance(currentLocation, chargingStation);
+				double distance = problem.distance(currentLocation, chargingStation);
 				double velocity = problem.getVelocityDistribution().generate(problem.getAverageVelocity());
 				time += distance / velocity;
 				currentLocation = chargingStation;
@@ -175,7 +175,7 @@ public class GPCustomerSelectorStohastic implements CustomerSelector {
 
 		}
 		
-		double distance = Location.distance(currentLocation, destination);
+		double distance = problem.distance(currentLocation, destination);
 		double velocity = problem.getVelocityDistribution().generate(problem.getAverageVelocity());
 		time += distance / velocity;
 		
@@ -190,25 +190,25 @@ public class GPCustomerSelectorStohastic implements CustomerSelector {
 		Location destination = customer;
 		double distance = 0;
 		
-		double fuelNeeded = fuelConsumptionRate * (Location.distance(currentLocation, customer));
-		fuelNeeded += fuelConsumptionRate * Location.distance(customer, customer.getNearestChargingStation());
+		double fuelNeeded = fuelConsumptionRate * (problem.distance(currentLocation, customer));
+		fuelNeeded += fuelConsumptionRate * problem.distance(customer, customer.getNearestChargingStation());
 		if (vehicle.getFuelCapacityLeft() < fuelNeeded) {
 			ChargingStation chargingStation = chooseChargingStation(vehicle, customer, problem);
 			if (chargingStation == null) {
-				double fuel = fuelConsumptionRate * Location.distance(currentLocation, depot);
+				double fuel = fuelConsumptionRate * problem.distance(currentLocation, depot);
 				if (fuel > vehicle.getFuelCapacityLeft()) {
 					chargingStation = chooseChargingStation(vehicle, depot, problem);
 				}
 				destination = depot;
 			}
 			if (chargingStation != null) {
-				distance += Location.distance(currentLocation, chargingStation);
+				distance += problem.distance(currentLocation, chargingStation);
 				currentLocation = chargingStation;
 			}
 
 		}
 		
-		distance += Location.distance(currentLocation, destination);
+		distance += problem.distance(currentLocation, destination);
 		
 		return distance;
 	}
@@ -223,16 +223,16 @@ public class GPCustomerSelectorStohastic implements CustomerSelector {
 		double bestEnergy = Double.MAX_VALUE;
 		for (ChargingStation cs : problem.getChargingStations()) {
 			double fuelCapacityLeft = v.getFuelCapacityLeft();
-			double distanceLCS = Location.distance(currentLocation, cs);
+			double distanceLCS = problem.distance(currentLocation, cs);
 			double fuelLCS = fuelConsumptionRate * distanceLCS;
 			fuelCapacityLeft -= fuelLCS;
 			// check if vehicle can reach charging station
 			if (fuelCapacityLeft >= 0) {
 				// get to destination from charging station
-				double distanceCSD = Location.distance(cs, destination);
+				double distanceCSD = problem.distance(cs, destination);
 				// check if vehicle can reach destination and nearest charging station
 				double fuelNeeded = fuelConsumptionRate
-						* (distanceCSD + Location.distance(destination, destination.getNearestChargingStation()));
+						* (distanceCSD + problem.distance(destination, destination.getNearestChargingStation()));
 				if (fuelNeeded <= vehicleFullTankCapacity) {
 					double energy = fuelConsumptionRate * (distanceLCS + distanceCSD);
 					if (energy < bestEnergy) {

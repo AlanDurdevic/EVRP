@@ -317,6 +317,7 @@ public class NNStohasticMultiple {
         return new StohasticEVRPProblem(
                 depot, tank, load, cons, refuel, avgVel,
                 customers, stations,
+                null, null,
                 demand, service, velocity);
     }
 

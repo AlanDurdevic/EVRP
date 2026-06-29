@@ -227,6 +227,7 @@ public class StohasticEVRP {
                 averageVelocity,
                 customers,
                 chargingStations,
+                null, null,
                 demandDistribution,
                 serviceTimeDistribution,
                 velocityDistribution);
