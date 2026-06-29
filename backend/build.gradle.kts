@@ -38,6 +38,9 @@ dependencies {
     implementation("io.jenetics:jenetics:8.3.0")
     implementation("io.jenetics:jenetics.prog:8.3.0")
 
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine")
+
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")

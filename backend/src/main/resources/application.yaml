@@ -19,3 +19,6 @@ cors:
 app:
   username: admin
   password: changeme
+
+osrm:
+  base-url: https://router.project-osrm.org
