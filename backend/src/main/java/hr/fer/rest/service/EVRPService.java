@@ -113,10 +113,10 @@ public class EVRPService implements EVRPSolverService {
                 evrpChargingStations,
                 distanceMatrix,
                 locationIndex,
-                // TODO: how to define this?
-                new UniformDistribution(2),
-                new UniformDistribution(2),
-                new UniformDistribution(2));
+                // CV 0.2 matches the mid-range used in the thesis experiments (0.1–0.3)
+                new UniformDistribution(0.2),
+                new UniformDistribution(0.2),
+                new UniformDistribution(0.2));
 
         GeneticProgrammingStohasticEVRP gp = switch (request.getVehicleMethod()) {
             case SERIAL -> new GeneticProgrammingStohasticEVRPSerialVehicle(problem);
