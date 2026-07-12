@@ -138,7 +138,7 @@ export default function Toolbar() {
           <Separator orientation="vertical" className="h-6" />
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1" data-tutorial="edit-tools">
           <ToolbarButton
             active={placementMode === 'select'}
             onClick={() => setPlacementMode('select')}
@@ -202,7 +202,7 @@ export default function Toolbar() {
           <Separator orientation="vertical" className="h-6" />
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4" data-tutorial="solver-options">
           <LabeledSelect
             label="Target"
             info="The objective the solver minimises: total energy consumed by all vehicles, total tardiness (sum of late arrivals), or total number of vehicles used."
@@ -252,23 +252,25 @@ export default function Toolbar() {
           </LabeledSelect>
         </div>
 
-        <ToolbarButton
-          tooltip="Calculate best route"
-          onClick={handleCalculate}
-          disabled={isCalculating}
-          className={cn(
-            'w-auto px-3 gap-1.5 text-xs font-medium',
-            'bg-violet-600 text-white border border-violet-700 shadow-sm',
-            'hover:bg-violet-700 hover:text-white',
-          )}
-        >
-          {isCalculating ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : (
-            <Route className="size-4" />
-          )}
-          {isCalculating ? 'Calculating…' : 'Calculate routes'}
-        </ToolbarButton>
+        <div data-tutorial="calculate">
+          <ToolbarButton
+            tooltip="Calculate best route"
+            onClick={handleCalculate}
+            disabled={isCalculating}
+            className={cn(
+              'w-auto px-3 gap-1.5 text-xs font-medium',
+              'bg-violet-600 text-white border border-violet-700 shadow-sm',
+              'hover:bg-violet-700 hover:text-white',
+            )}
+          >
+            {isCalculating ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Route className="size-4" />
+            )}
+            {isCalculating ? 'Calculating…' : 'Calculate routes'}
+          </ToolbarButton>
+        </div>
 
         <ToolbarButton tooltip="Reset problem" onClick={() => setConfirmReset(true)}>
           <RotateCcw className="size-4" />

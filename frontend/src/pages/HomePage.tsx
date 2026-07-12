@@ -1,6 +1,7 @@
 import MapView from '@/components/MapView'
 import AppSidebar from '@/components/Sidebar'
 import Toolbar from '@/components/Toolbar'
+import { Tutorial } from '@/components/Tutorial'
 import { KeyboardShortcutsDialog } from '@/components/KeyboardShortcutsDialog'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
@@ -18,6 +19,7 @@ export default function HomePage() {
             </div>
           </SidebarInset>
         </div>
+        <Tutorial />
       </SidebarProvider>
       <KeyboardShortcutsDialog />
       <Toaster richColors position="bottom-right" />
