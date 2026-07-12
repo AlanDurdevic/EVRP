@@ -256,12 +256,18 @@ export default function Toolbar() {
           tooltip="Calculate best route"
           onClick={handleCalculate}
           disabled={isCalculating}
+          className={cn(
+            'w-auto px-3 gap-1.5 text-xs font-medium',
+            'bg-violet-600 text-white border border-violet-700 shadow-sm',
+            'hover:bg-violet-700 hover:text-white',
+          )}
         >
           {isCalculating ? (
             <Loader2 className="size-4 animate-spin" />
           ) : (
             <Route className="size-4" />
           )}
+          {isCalculating ? 'Calculating…' : 'Calculate routes'}
         </ToolbarButton>
 
         <ToolbarButton tooltip="Reset problem" onClick={() => setConfirmReset(true)}>
