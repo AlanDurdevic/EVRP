@@ -19,17 +19,17 @@ export default function AppSidebar({ ...props }: React.ComponentProps<typeof Sid
       <Sidebar className="top-(--header-height) h-[calc(100svh-var(--header-height))]!" {...props}>
         <SidebarHeader className="border-b border-gray-200">
           <TabsList className="w-full bg-transparent">
-            <TabsTrigger value="elements" className="flex-1 gap-2 py-4">
+            <TabsTrigger value="elements" className="flex-1 gap-2 py-2">
               <List size={3.5} />
               Elements
             </TabsTrigger>
 
-            <TabsTrigger value="settings" className="flex-1 gap-2 py-4">
+            <TabsTrigger value="settings" className="flex-1 gap-2 py-2">
               <Settings size={3.5} />
               Settings
             </TabsTrigger>
 
-            <TabsTrigger value="vehicles" className="flex-1 gap-2 py-4">
+            <TabsTrigger value="vehicles" className="flex-1 gap-2 py-2">
               <Zap size={3.5} />
               Vehicles
             </TabsTrigger>

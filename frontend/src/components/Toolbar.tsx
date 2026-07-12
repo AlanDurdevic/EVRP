@@ -10,6 +10,7 @@ import {
   Loader2,
   LogOut,
   MapPin,
+  Menu,
   MousePointer,
   Route,
   RotateCcw,
@@ -19,7 +20,7 @@ import {
   Zap,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from './ui/button'
 import { ConfirmDialog } from './ConfirmDialog'
@@ -34,6 +35,7 @@ import {
   SelectValue,
 } from './ui/select'
 import { Separator } from './ui/separator'
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from './ui/sheet'
 import { useSidebar } from './ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
@@ -51,6 +53,15 @@ const VEHICLE_METHODS: { value: VehicleMethod; label: string }[] = [
   { value: 'serial', label: 'Serial' },
 ]
 
+const TARGET_INFO =
+  'The objective the solver minimises: total energy consumed by all vehicles, total ' +
+  'tardiness (sum of late arrivals), or total number of vehicles used.'
+
+const METHOD_INFO =
+  'The vehicle-selection heuristic used when building routes. Parallel and serial differ ' +
+  'in how vehicles are assigned simultaneously vs. one at a time. The B variants use an ' +
+  'alternative scoring function. Iteration variants run multiple passes to refine the solution.'
+
 export default function Toolbar() {
   const {
     placementMode,
@@ -62,13 +73,27 @@ export default function Toolbar() {
     setRoutingResult,
     optimizationTarget,
     vehicleMethod,
-    setOptimizationTarget,
-    setVehicleMethod,
     setAuthenticated,
+    toolbarMenuOpen: menuOpen,
+    setToolbarMenuOpen: setMenuOpen,
   } = useEVRPStore()
   const [confirmReset, setConfirmReset] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
   const { toggleSidebar, open } = useSidebar()
+
+  const headerRef = useRef<HTMLElement>(null)
+  const [isWrapped, setIsWrapped] = useState(false)
+
+  // A single toolbar row is 56px; anything taller means the items wrapped onto extra rows.
+  useEffect(() => {
+    const el = headerRef.current
+    if (!el) return
+
+    const observer = new ResizeObserver(() => setIsWrapped(el.offsetHeight > 64))
+    observer.observe(el)
+
+    return () => observer.disconnect()
+  }, [])
 
   const handleExport = () => {
     const data = exportProblem()
@@ -122,17 +147,45 @@ export default function Toolbar() {
     input.click()
   }
 
+  const handleLogout = async () => {
+    await logout()
+    setAuthenticated(false)
+  }
+
+  const legend = (
+    <>
+      <div className="flex items-center gap-2">
+        <div className="size-3 rounded-sm bg-depot" />
+        <span>Depot</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="size-3 rounded-full bg-customer" />
+        <span>Customers: {problem.customers.length}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="size-3 rounded-full bg-station" />
+        <span>Stations: {problem.chargingStations.length}</span>
+      </div>
+    </>
+  )
+
   return (
     <TooltipProvider delayDuration={0}>
-      <header className="flex items-center h-(--header-height) w-full gap-1 px-4 border-b border-gray-200 pr-8">
-        <ToolbarButton
-          active={!open}
-          onClick={toggleSidebar}
-          tooltip={!open ? 'Expand sidebar' : 'Collapse sidebar'}
-          className="text-black bg-white"
-        >
-          <SidebarIcon className="size-4" />
-        </ToolbarButton>
+      <header
+        ref={headerRef}
+        className="flex flex-wrap items-center min-h-14 w-full gap-x-1 gap-y-2 px-4 py-2
+          border-b border-gray-200 md:pr-8 relative z-20 bg-background [&>*]:shrink-0"
+      >
+        <div data-tutorial="sidebar-toggle">
+          <ToolbarButton
+            active={!open}
+            onClick={toggleSidebar}
+            tooltip={!open ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="text-black bg-white"
+          >
+            <SidebarIcon className="size-4" />
+          </ToolbarButton>
+        </div>
 
         <div className="flex items-center mx-2">
           <Separator orientation="vertical" className="h-6" />
@@ -184,11 +237,11 @@ export default function Toolbar() {
           </ToolbarButton>
         </div>
 
-        <div className="flex items-center mx-2">
+        <div className="hidden md:flex items-center mx-2">
           <Separator orientation="vertical" className="h-6" />
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="hidden md:flex items-center gap-1">
           <ToolbarButton tooltip="Import problem" onClick={handleImport}>
             <Upload className="size-4" />
           </ToolbarButton>
@@ -198,61 +251,21 @@ export default function Toolbar() {
           </ToolbarButton>
         </div>
 
-        <div className="flex items-center mx-2">
+        <div className="hidden md:flex items-center mx-2">
           <Separator orientation="vertical" className="h-6" />
         </div>
 
-        <div className="flex items-center gap-4" data-tutorial="solver-options">
-          <LabeledSelect
-            label="Target"
-            info="The objective the solver minimises: total energy consumed by all vehicles, total tardiness (sum of late arrivals), or total number of vehicles used."
-          >
-            <Select
-              value={optimizationTarget}
-              onValueChange={(v) => setOptimizationTarget(v as OptimizationTarget)}
-            >
-              <SelectTrigger className="h-8 w-36 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectGroup>
-                <SelectContent>
-                  <SelectLabel>Target</SelectLabel>
-                  {OPTIMIZATION_TARGETS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value} className="text-xs">
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </SelectGroup>
-            </Select>
+        <div className="hidden md:flex items-center gap-4" data-tutorial="solver-options">
+          <LabeledSelect label="Target" info={TARGET_INFO}>
+            <TargetSelect className="w-36" />
           </LabeledSelect>
 
-          <LabeledSelect
-            label="Program type"
-            info="The vehicle-selection heuristic used when building routes. Parallel and serial differ in how vehicles are assigned simultaneously vs. one at a time. The B variants use an alternative scoring function. Iteration variants run multiple passes to refine the solution."
-          >
-            <Select
-              value={vehicleMethod}
-              onValueChange={(v) => setVehicleMethod(v as VehicleMethod)}
-            >
-              <SelectTrigger className="h-8 w-44 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Program type</SelectLabel>
-                  {VEHICLE_METHODS.map(({ value, label }) => (
-                    <SelectItem key={value} value={value} className="text-xs">
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+          <LabeledSelect label="Program type" info={METHOD_INFO}>
+            <MethodSelect className="w-44" />
           </LabeledSelect>
         </div>
 
-        <div data-tutorial="calculate">
+        <div className="hidden lg:block" data-tutorial="calculate">
           <ToolbarButton
             tooltip="Calculate best route"
             onClick={handleCalculate}
@@ -272,39 +285,131 @@ export default function Toolbar() {
           </ToolbarButton>
         </div>
 
-        <ToolbarButton tooltip="Reset problem" onClick={() => setConfirmReset(true)}>
+        <ToolbarButton
+          tooltip="Reset problem"
+          onClick={() => setConfirmReset(true)}
+          className="hidden md:inline-flex"
+        >
           <RotateCcw className="size-4" />
         </ToolbarButton>
 
-        <div className="flex items-center mx-2">
+        <div className={cn('hidden md:flex items-center mx-2', isWrapped && 'invisible')}>
           <Separator orientation="vertical" className="h-6" />
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-muted-foreground ml-auto">
-          <div className="flex items-center gap-2">
-            <div className="size-3 rounded-sm bg-depot" />
-            <span>Depot</span>
+        <div className={cn('hidden md:flex items-center gap-1', !isWrapped && 'ml-auto')}>
+          <div className="hidden lg:flex items-center gap-4 text-xs text-muted-foreground mr-3">
+            {legend}
           </div>
-          <div className="flex items-center gap-2">
-            <div className="size-3 rounded-full bg-customer" />
-            <span>Customers: {problem.customers.length}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="size-3 rounded-full bg-station" />
-            <span>Stations: {problem.chargingStations.length}</span>
-          </div>
+
+          <ToolbarButton tooltip="Sign out" onClick={handleLogout}>
+            <LogOut className="size-4" />
+          </ToolbarButton>
         </div>
 
-        <ToolbarButton
-          tooltip="Sign out"
-          onClick={async () => {
-            await logout()
-            setAuthenticated(false)
-          }}
-        >
-          <LogOut className="size-4" />
-        </ToolbarButton>
+        <div className="md:hidden ml-auto" data-tutorial="menu-button">
+          <ToolbarButton tooltip="Menu" onClick={() => setMenuOpen(true)}>
+            <Menu className="size-4" />
+          </ToolbarButton>
+        </div>
       </header>
+
+      <div className="lg:hidden fixed bottom-8 right-6 z-[1200]" data-tutorial="calculate">
+        <Button
+          onClick={handleCalculate}
+          disabled={isCalculating}
+          className="h-10 rounded-lg px-4 gap-2 text-sm font-medium bg-violet-600 text-white
+            border border-violet-700 shadow-lg hover:bg-violet-700"
+        >
+          {isCalculating ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Route className="size-4" />
+          )}
+          {isCalculating ? 'Calculating…' : 'Calculate routes'}
+        </Button>
+      </div>
+
+      <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+        <SheetContent side="right" className="w-80">
+          <SheetHeader>
+            <SheetTitle>Menu</SheetTitle>
+            <SheetDescription className="sr-only">
+              Solver options and problem actions
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="flex flex-col gap-6 px-4 pb-4 overflow-y-auto">
+            <div className="flex flex-col gap-3" data-tutorial="solver-options">
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-muted-foreground">Target</span>
+                <TargetSelect className="w-full" />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <span className="text-xs text-muted-foreground">Program type</span>
+                <MethodSelect className="w-full" />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="justify-start gap-2"
+                onClick={() => {
+                  setMenuOpen(false)
+                  handleImport()
+                }}
+              >
+                <Upload className="size-4" />
+                Import problem
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="justify-start gap-2"
+                onClick={handleExport}
+              >
+                <Download className="size-4" />
+                Export problem
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                className="justify-start gap-2"
+                onClick={() => {
+                  setMenuOpen(false)
+                  setConfirmReset(true)
+                }}
+              >
+                <RotateCcw className="size-4" />
+                Reset problem
+              </Button>
+            </div>
+
+            <Separator />
+
+            <div className="flex flex-col gap-2 text-xs text-muted-foreground">{legend}</div>
+
+            <Separator />
+
+            <Button
+              variant="outline"
+              size="sm"
+              className="justify-start gap-2"
+              onClick={handleLogout}
+            >
+              <LogOut className="size-4" />
+              Sign out
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <ConfirmDialog
         open={confirmReset}
@@ -314,6 +419,55 @@ export default function Toolbar() {
         onConfirm={resetProblem}
       />
     </TooltipProvider>
+  )
+}
+
+const TargetSelect = ({ className }: { className?: string }) => {
+  const optimizationTarget = useEVRPStore((s) => s.optimizationTarget)
+  const setOptimizationTarget = useEVRPStore((s) => s.setOptimizationTarget)
+
+  return (
+    <Select
+      value={optimizationTarget}
+      onValueChange={(v) => setOptimizationTarget(v as OptimizationTarget)}
+    >
+      <SelectTrigger className={cn('h-8 text-xs', className)}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Target</SelectLabel>
+          {OPTIMIZATION_TARGETS.map(({ value, label }) => (
+            <SelectItem key={value} value={value} className="text-xs">
+              {label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
+}
+
+const MethodSelect = ({ className }: { className?: string }) => {
+  const vehicleMethod = useEVRPStore((s) => s.vehicleMethod)
+  const setVehicleMethod = useEVRPStore((s) => s.setVehicleMethod)
+
+  return (
+    <Select value={vehicleMethod} onValueChange={(v) => setVehicleMethod(v as VehicleMethod)}>
+      <SelectTrigger className={cn('h-8 text-xs', className)}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          <SelectLabel>Program type</SelectLabel>
+          {VEHICLE_METHODS.map(({ value, label }) => (
+            <SelectItem key={value} value={value} className="text-xs">
+              {label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   )
 }
 
@@ -367,6 +521,7 @@ const ToolbarButton = ({
       <Button
         variant={active ? 'default' : 'ghost'}
         size="icon-sm"
+        aria-label={tooltip}
         onClick={onClick}
         disabled={disabled}
         className={cn(

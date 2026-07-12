@@ -54,6 +54,7 @@ interface EVRPStore {
   stationsOpen: boolean
   routesOpen: boolean
   openRouteDetails: Record<number, boolean>
+  toolbarMenuOpen: boolean
 
   setSelection: (selection: Selection) => void
   clearSelection: () => void
@@ -66,6 +67,7 @@ interface EVRPStore {
   setStationsOpen: (v: boolean) => void
   setRoutesOpen: (v: boolean) => void
   toggleRouteDetails: (index: number) => void
+  setToolbarMenuOpen: (v: boolean) => void
 
   // --- Routing ---
   optimizationTarget: OptimizationTarget
@@ -228,6 +230,7 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   stationsOpen: true,
   routesOpen: true,
   openRouteDetails: {},
+  toolbarMenuOpen: false,
 
   setSelection: (selection) => set({ selection }),
   clearSelection: () => set({ selection: { type: null, id: null } }),
@@ -239,6 +242,7 @@ export const useEVRPStore = create<EVRPStore>((set, get) => ({
   setCustomersOpen: (v) => set({ customersOpen: v }),
   setStationsOpen: (v) => set({ stationsOpen: v }),
   setRoutesOpen: (v) => set({ routesOpen: v }),
+  setToolbarMenuOpen: (v) => set({ toolbarMenuOpen: v }),
   toggleRouteDetails: (index) =>
     set((s) => ({
       openRouteDetails: { ...s.openRouteDetails, [index]: !s.openRouteDetails[index] },
